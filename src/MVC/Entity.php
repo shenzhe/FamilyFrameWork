@@ -2,7 +2,7 @@
 //file framework/Family/MVC/Entity.php
 namespace Family\MVC;
 
-use common\validateInput\ValidateInput;
+use ValidateInput\ValidateInput;
 use Family\Core\Log;
 
 abstract class Entity

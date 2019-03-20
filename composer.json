@@ -21,6 +21,7 @@
     "php": ">=7.2",
     "nikic/fast-route": "*",
     "easyswoole/http": "^1.0",
+    "shenzhe/validate": "*",
     "ext-swoole": ">=4.2.9"
   }
 }
