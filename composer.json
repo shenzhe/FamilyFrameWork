@@ -1,6 +1,6 @@
 {
   "name": "shenzhe/family",
-  "description": "family framework",
+  "description": "family framework for swoole4",
   "keywords": [
     "swoole",
     "mvc",
