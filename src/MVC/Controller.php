@@ -14,9 +14,6 @@ abstract class Controller
      * @var \EasySwoole\Http\Request
      */
     protected $request;
-    /**
-     * @var \Twig\Environment
-     */
     protected $template;
 
     const _CONTROLLER_KEY_ = '__CTR__';
@@ -30,7 +27,6 @@ abstract class Controller
          */
         $context = Context::getInstance()->get();
         $this->request = $context->getRequest();
-        $this->template = Template::getInstance()->template;
     }
 
 }
