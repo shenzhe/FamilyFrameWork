@@ -85,7 +85,7 @@ class Config
      * @return mixed
      * @desc 读取子配置
      */
-    public static function getField($key, $sub, $def)
+    public static function getField($key, $sub, $def = null)
     {
         if (isset(self::$configMap[$key][$sub])) {
             return self::$configMap[$key][$sub];
