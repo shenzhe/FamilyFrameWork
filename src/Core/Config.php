@@ -24,7 +24,7 @@ class Config
      *          此配置不可热加载
      * @throws ConfigException
      */
-    public static function load(string $dir = '')
+    public static function load(string $dir = null)
     {
         if (!empty($dir)) {
             self::$configDir = $dir;

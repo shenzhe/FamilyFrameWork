@@ -14,13 +14,14 @@ class Family
      */
     public static $rootPath;
     /**
-     * @var 框架目录
-     */
-    public static $frameworkPath;
-    /**
      * @var 程序目录
      */
     public static $applicationPath;
+
+    public static function setRootPath($rootPath)
+    {
+        self::$rootPath = $rootPath;
+    }
 
     final public static function run()
     {
@@ -28,8 +29,9 @@ class Family
             if (!defined('DS')) {
                 define('DS', DIRECTORY_SEPARATOR);
             }
-            self::$rootPath = dirname(dirname(__DIR__));
-            self::$frameworkPath = self::$rootPath . DS . 'framework';
+            if (empty(self::$rootPath)) {
+                self::$rootPath = dirname(dirname(dirname(dirname(__DIR__))));
+            }
             self::$applicationPath = self::$rootPath . DS . 'application';
 
             //先注册自动加载
