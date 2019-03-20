@@ -10,13 +10,15 @@ use SeasLog;
 class Log
 {
     private static $seaslog = false;
+    private static $level = 8;
 
     //设置日志目录
     public static function init()
     {
         if (class_exists('SeasLog')) {
             self::$seaslog = true;
-            SeasLog::setBasePath(Config::get('default_basepath'));
+            SeasLog::setBasePath(Config::getField('log', 'default_basepath'));
+            self::$level = Config::getField('log', 'log_level', 8);
         }
     }
 
@@ -38,7 +40,7 @@ class Log
     public static function debug($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_DEBUG
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 7) {
             SeasLog::debug($message, $context, $module);
         }
     }
@@ -53,7 +55,7 @@ class Log
     public static function info($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_INFO
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 6) {
             SeasLog::info($message, $context, $module);
         }
     }
@@ -68,7 +70,7 @@ class Log
     public static function notice($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_NOTICE
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 5) {
             SeasLog::notice($message, $context, $module);
         }
     }
@@ -83,7 +85,7 @@ class Log
     public static function warning($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_WARNING
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 4) {
             SeasLog::warning($message, $context, $module);
         }
     }
@@ -98,7 +100,7 @@ class Log
     public static function error($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_ERROR
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 3) {
             SeasLog::error($message, $context, $module);
         }
     }
@@ -113,7 +115,7 @@ class Log
     public static function critical($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_CRITICAL
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 2) {
             SeasLog::critical($message, $context, $module);
         }
     }
@@ -128,7 +130,7 @@ class Log
     public static function alert($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_ALERT
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 1) {
             SeasLog::alert($message, $context, $module);
         }
     }
@@ -143,7 +145,7 @@ class Log
     public static function emergency($message, array $context = array(), $module = '')
     {
         #$level = SEASLOG_EMERGENCY
-        if (self::$seaslog) {
+        if (self::$seaslog && self::$level > 0) {
             SeasLog::emergency($message, $context, $module);
         }
     }

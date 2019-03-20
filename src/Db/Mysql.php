@@ -119,14 +119,14 @@ class Mysql
 //        $result = call_user_func_array([$db, $name], $arguments);
         $time = microtime(true);
         $result = $db->$name($sql);
-        Log::info($sql . ':' . (microtime(true) - $time));
+        Log::debug($sql . ':' . (microtime(true) - $time));
         if (false === $result) {
             Log::warning('mysql query:{sql} false', ['{sql}' => $sql]);
             if (!$db->connected) { //断线重连
                 $db = $this->reconnect($res['type'], $res['index']);
                 $time = microtime(true);
                 $result = $db->$name($sql);
-                Log::info($sql . ':' . (microtime(true) - $time));
+                Log::debug($sql . ':' . (microtime(true) - $time));
                 return $this->parseResult($result, $db);
             }
 

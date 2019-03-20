@@ -67,13 +67,13 @@ class Redis
         }
         $time = microtime(true);
         $result = call_user_func_array([$this->redis, $name], $arguments);
-        Log::info($name . ':' . (microtime(true) - $time));
+        Log::debug($name . ':' . (microtime(true) - $time));
         if (false === $result) {
             if (!$this->redis->connected) { //断线重连
                 $db = $this->connect($this->config);
                 $time = microtime(true);
                 $result = call_user_func_array([$this->redis, $name], $arguments);
-                Log::info($name . ':' . (microtime(true) - $time));
+                Log::debug($name . ':' . (microtime(true) - $time));
                 return $this->parseResult($result, $db);
             }
 

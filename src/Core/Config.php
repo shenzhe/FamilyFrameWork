@@ -77,4 +77,20 @@ class Config
 
         return $def;
     }
+
+    /**
+     * @param $key
+     * @param $sub
+     * @param $def
+     * @return mixed
+     * @desc 读取子配置
+     */
+    public static function getField($key, $sub, $def)
+    {
+        if (isset(self::$configMap[$key][$sub])) {
+            return self::$configMap[$key][$sub];
+        }
+
+        return $def;
+    }
 }
