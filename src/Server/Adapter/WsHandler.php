@@ -44,7 +44,7 @@ class WsHandler
                     Log::error("event must implements Helper\EventHandler");
                 } else {
                     self::$eventHandler = $event;
-                    $event->workerStart();
+                    $event->workerStart($serv, $worker_id);
                 }
             }
         } catch (\Exception $e) {

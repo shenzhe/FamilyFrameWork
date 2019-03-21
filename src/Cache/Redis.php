@@ -9,7 +9,7 @@ use Swoole\Coroutine\Redis as coRedis;
 class Redis
 {
     /**
-     * @var Redis
+     * @var coRedis
      */
     private $redis;
     private $config;

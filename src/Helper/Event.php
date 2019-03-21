@@ -9,12 +9,8 @@ use Family\Core\Singleton;
 class Event implements EventHandler
 {
     use Singleton;
-    public function serverStart()
-    {
-        // TODO: Implement serverStart() method.
-    }
 
-    public function workerStart()
+    public function workerStart($serv, $worker_id)
     {
         // TODO: Implement workerStart() method.
     }
