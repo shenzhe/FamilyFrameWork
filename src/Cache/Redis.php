@@ -25,6 +25,10 @@ class Redis
     public function connect($config)
     {
         //创建主数据连接
+        if (empty($config)) {
+            throw new RedisException(RedisException::CONFIG_EMPTY);
+        }
+
         $redis = new coRedis();
         $res = $redis->connect($config['host'], $config['port']);
         if ($res === false) {
@@ -74,7 +78,7 @@ class Redis
                 $time = microtime(true);
                 $result = call_user_func_array([$this->redis, $name], $arguments);
                 Log::debug($name . ':' . (microtime(true) - $time));
-                return $this->parseResult($result, $db);
+                return $result;
             }
 
             if (!empty($this->redis->errCode)) {  //有错误码，则抛出弃常
