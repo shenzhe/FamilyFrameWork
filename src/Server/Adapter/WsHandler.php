@@ -21,7 +21,41 @@ class WsHandler
      */
     public static $eventHandler;
 
-    public static function onWorkerStart(\swoole_http_server $serv, int $worker_id)
+    public static function onStart($serv)
+    {
+        if (class_exists('Event')) {
+            $event = new Event();
+            if (!($event instanceof Helper\EventHandler)) {
+                Log::error("event must implements Helper\EventHandler");
+            } else {
+                self::$eventHandler = $event;
+                $event->start($serv);
+            }
+        }
+    }
+
+    public static function onShutDown($serv)
+    {
+        if (self::$eventHandler) {
+            self::$eventHandler->shutdown($serv);
+        }
+    }
+
+    public static function onWorkerStop($serv, $worker_id)
+    {
+        if (self::$eventHandler) {
+            self::$eventHandler->onWorkerStop($serv, $worker_id);
+        }
+    }
+
+    public static function onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal)
+    {
+        if (self::$eventHandler) {
+            self::$eventHandler->onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
+        }
+    }
+
+    public static function onWorkerStart($serv, int $worker_id)
     {
         if (0 == $worker_id) {
             if (function_exists('opcache_reset')) {
@@ -37,9 +71,8 @@ class WsHandler
             /**
              * @var $event Helper\EventHandler
              */
-            $eventClass = Config::get('event_handler');
-            if (!empty($eventClass)) {
-                $event = new $eventClass();
+            if (class_exists('Event')) {
+                $event = new Event();
                 if (!($event instanceof Helper\EventHandler)) {
                     Log::error("event must implements Helper\EventHandler");
                 } else {

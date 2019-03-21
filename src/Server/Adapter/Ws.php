@@ -46,17 +46,28 @@ class Ws
 //                '{managerId}' => $serv->manager_pid,
 //            ]);
             echo "http server staring! ://" . Config::get('host') . ":" . Config::get('port');
+            WsHandler::onStart($serv);
         });
 
-        $http->on('shutdown', function () {
+        $http->on('shutdown', function ($serv) {
             //服务关闭，删除进程id
             unlink(Family::$rootPath . DS . 'bin' . DS . 'master.pid');
             unlink(Family::$rootPath . DS . 'bin' . DS . 'manager.pid');
 //            Log::info("http server shutdown");
             echo "http server shutdown";
+            WsHandler::onShutDown($serv);
         });
+
+        $http->on('workerStop', function (\swoole_http_server $serv, int $worker_id) {
+            WsHandler::onWorkerStop($serv, $worker_id);
+        });
+
         $http->on('workerStart', function (\swoole_http_server $serv, int $worker_id) {
             WsHandler::onWorkerStart($serv, $worker_id);
+        });
+
+        $http->on('onWorkerError', function (swoole_server $serv, int $worker_id, int $worker_pid, int $exit_code, int $signal) {
+            WsHandler::onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
         });
         $http->on('request', function (
             \swoole_http_request $request,
