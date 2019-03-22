@@ -43,4 +43,9 @@ abstract class Entity
     {
         return [];
     }
+
+    public function toJson()
+    {
+        return json_encode($this, JSON_UNESCAPED_UNICODE, JSON_UNESCAPED_SLASHES);
+    }
 }
