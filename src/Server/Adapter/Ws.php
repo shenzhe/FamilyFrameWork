@@ -81,6 +81,13 @@ class Ws
         ) {
             WsHandler::onMessage($server, $frame);
         });
+
+        $http->on('task', function (
+            \swoole_websocket_server $server,
+            \swoole_server_task $task
+        ) {
+            WsHandler::onTask($server, $task);
+        });
         $http->start();
     }
 }

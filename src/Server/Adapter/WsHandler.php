@@ -129,12 +129,16 @@ class WsHandler
             $exceptionHandler = Config::get('exception_handler', BaseException::class);
             $result = forward_static_call([$exceptionHandler, 'exceptionHandler'], $e);
         }
-        $response->end($result);
         //记录请求日志
         Log::access($request);
         if (self::$eventHandler) {
-            self::$eventHandler->requestAfter();
+            $ret = self::$eventHandler->requestAfter($result);
+            if ($ret) {
+                $result = $ret;
+            }
         }
+
+        $response->end($result);
     }
 
     public static function onMessage(
@@ -158,16 +162,56 @@ class WsHandler
         try {
             //自动路由
             $result = Route::dispatch();
-            $server->push($frame->fd, $result);
         } catch (\Exception $e) { //程序异常
             $result = BaseException::exceptionHandler($e);
-            $server->push($frame->fd, $result);
         } catch (\Error $e) { //程序错误，如fatal error
             $result = BaseException::exceptionHandler($e);
-            $server->push($frame->fd, $result);
         } catch (\Throwable $e) {  //兜底
             $result = BaseException::exceptionHandler($e);
-            $server->push($frame->fd, $result);
         }
+
+        if (self::$eventHandler) {
+            self::$eventHandler->messageAfter($server, $result);
+        }
+
+        $server->push($frame->fd, $result);
+    }
+
+    public static function onTask(
+        \swoole_websocket_server $server,
+        \swoole_server_task $task
+    )
+    {
+        //初始化根协程ID
+        Coroutine::setBaseId();
+        //初始化上下文
+        $context = new Context(Helper\Protocol::taskToRequest($task));
+        $context->set('task', $task);
+        //存放容器pool
+        Pool\Context::getInstance()->put($context);
+        //协程退出，自动清空
+        defer(function () {
+            //清空当前pool的上下文，释放资源
+            Pool\Context::getInstance()->release();
+        });
+
+        try {
+            //自动路由
+            $result = Route::dispatch();
+        } catch (\Exception $e) { //程序异常
+            $result = BaseException::exceptionHandler($e);
+        } catch (\Error $e) { //程序错误，如fatal error
+            $result = BaseException::exceptionHandler($e);
+        } catch (\Throwable $e) {  //兜底
+            $result = BaseException::exceptionHandler($e);
+        }
+
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'taskAfter')) {
+                self::$eventHandler->taskAfter($server, $result);
+            }
+        }
+
+        return $result;
     }
 }

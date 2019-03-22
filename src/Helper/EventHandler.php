@@ -25,5 +25,11 @@ interface EventHandler
     public function onRequest();
 
     //请求结束后回调
-    public function requestAfter();
+    public function requestAfter($result);
+
+    //webscoket请求结束后回调
+    public function messageAfter($serv, $result);
+
+    //task请求结束后回调
+    public function taskAfter($serv, $result);
 }

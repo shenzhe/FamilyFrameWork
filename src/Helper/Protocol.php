@@ -20,4 +20,15 @@ class Protocol
         $request->post = $data[1];
         return $request;
     }
+
+    public static function taskToRequest(
+        Swoole\Server\Task $task
+    ): Request
+    {
+        $request = new Request();
+        $request->server['http_method'] = 'POST';
+        $request->server['path_info'] = '/task';
+        $request->post = $task->data;
+        return $request;
+    }
 }
