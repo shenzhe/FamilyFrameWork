@@ -27,7 +27,7 @@ class Event implements EventHandler
 
     public function workerStop($serv, $worker_id)
     {
-        // TODO: Implement workerStart() method.
+        // TODO: Implement workerStop() method.
     }
 
     public function workerError($serv, $worker_id, $worker_pid, $exit_code, $signal)
@@ -40,8 +40,18 @@ class Event implements EventHandler
         // TODO: Implement onRequest() method.
     }
 
-    public function requestAfter()
+    public function requestAfter($result)
     {
         // TODO: Implement requestAfter() method.
+    }
+
+    public function messageAfter($serv, $result)
+    {
+        // TODO: Implement messageAfter() method.
+    }
+
+    public function taskAfter($serv, $result)
+    {
+        // TODO: Implement taskAfter() method.
     }
 }
