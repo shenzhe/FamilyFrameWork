@@ -5,12 +5,18 @@ namespace Family\Server\Adapter;
 
 
 use Family\Core\Config;
+use Family\Core\Log;
 use Swoole;
 
 class Ps
 {
     public function __construct()
     {
+        if (class_exists('ProcessEvent')) {
+            Log::error('ProcessEvent class no exits');
+            echo 'ProcessEvent class no exits';
+            return '';
+        }
         //加载配置
         $configDir = '';
         $options = getopt("c::");
