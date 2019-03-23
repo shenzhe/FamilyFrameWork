@@ -49,7 +49,7 @@ class Redis
     }
 
     /**
-     * @return Redis
+     * @return coRedis
      * @desc 获取redis操作实例
      */
     public function getRedis()
