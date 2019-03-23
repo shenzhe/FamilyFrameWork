@@ -40,11 +40,13 @@ class Family
             //服务启动
             (new Server())->start();
         } catch (\Exception $e) {
-            Log::emergency($e->getMessage());
-            echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL;
+            Log::exception($e->getMessage());
+//            echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL;
+            print_r($e);
         } catch (\Throwable $throwable) {
-            Log::emergency($throwable->getMessage());
-            echo $throwable->getCode() . ':' . $throwable->getMessage() . PHP_EOL;
+            Log::exception($throwable->getMessage());
+//            echo $throwable->getCode() . ':' . $throwable->getMessage() . PHP_EOL;
+            print_r($throwable);
         }
     }
 
