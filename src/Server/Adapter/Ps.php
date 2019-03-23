@@ -5,7 +5,6 @@ namespace Family\Server\Adapter;
 
 
 use Family\Core\Config;
-use Family\Core\Log;
 use Family\Coroutine\Coroutine;
 use Family\Family;
 use Swoole;
@@ -14,21 +13,6 @@ class Ps
 {
     public function __construct()
     {
-        if (class_exists('ProcessEvent')) {
-            Log::error('ProcessEvent class no exits');
-            echo 'ProcessEvent class no exits';
-            return '';
-        }
-        //加载配置
-        $configDir = '';
-        $options = getopt("c::");
-        if (!empty($options['c'])) {
-            $configDir = $options['c'];
-        }
-        Config::load($configDir);
-        $timeZone = Config::get('time_zone', 'Asia/Shanghai');
-        \date_default_timezone_set($timeZone);
-
         Swoole\Runtime::enableCoroutine();
 
         $workerNum = Config::getField('process', 'worker_num');
