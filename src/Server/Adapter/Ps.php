@@ -19,6 +19,12 @@ class Ps
             return '';
         }
 
+        $daemonize = Config::getField('process', 'daemonize', 0);
+        if ($daemonize) {
+            //守护进程化
+            Swoole\Process::daemon();
+        }
+
         Swoole\Runtime::enableCoroutine();
 
         $workerNum = Config::getField('process', 'worker_num');
@@ -34,12 +40,6 @@ class Ps
             $pid = posix_getpid();
             file_put_contents($binDir . DIRECTORY_SEPARATOR . 'master.pid', $pid);
             file_put_contents($binDir . DIRECTORY_SEPARATOR . 'manager.pid', $pid);
-        }
-
-        $daemonize = Config::getField('process', 'daemonize', 0);
-        if ($daemonize) {
-            //守护进程化
-            Swoole\Process::daemon();
         }
 
         $pool = new Swoole\Process\Pool($workerNum, $ipcType, $queueKey);
