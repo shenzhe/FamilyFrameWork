@@ -107,10 +107,18 @@ class Coroutine
         }
         $ret = null;
         if (\is_object($cb) || (\is_string($cb) && \function_exists($cb))) {
-            $ret = $cb(...$args);
+            if (empty($args)) {
+                $ret = $cb();
+            } else {
+                $ret = $cb(...$args);
+            }
         } elseif (\is_array($cb)) {
             list($obj, $mhd) = $cb;
-            $ret = \is_object($obj) ? $obj->$mhd(...$args) : $obj::$mhd(...$args);
+            if (empty($args)) {
+                $ret = \is_object($obj) ? $obj->$mhd() : $obj::$mhd();
+            } else {
+                $ret = \is_object($obj) ? $obj->$mhd(...$args) : $obj::$mhd(...$args);
+            }
         }
         return $ret;
     }
