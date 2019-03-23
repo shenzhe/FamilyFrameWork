@@ -7,6 +7,7 @@ namespace Family\Server\Adapter;
 use Family\Core\Config;
 use Family\Core\Log;
 use Family\Coroutine\Coroutine;
+use Family\Family;
 use Swoole;
 
 class Ps
@@ -37,7 +38,13 @@ class Ps
         $ipcType = Config::getField('process', 'ipc_type', 0);
 
         $queueKey = Config::getField('process', 'msgqueue_key', 0);
-
+        $binDir = Family::$applicationPath . DIRECTORY_SEPARATOR . 'bin';
+        if (is_dir($binDir)) {
+            //写入进程id
+            $pid = posix_getpid();
+            file_put_contents($binDir . DIRECTORY_SEPARATOR . 'master.pid', $pid);
+            file_put_contents($binDir . DIRECTORY_SEPARATOR . 'manager.pid', $pid);
+        }
 
         $pool = new Swoole\Process\Pool($workerNum, $ipcType, $queueKey);
         $pool->on('WorkerStart', function ($pool, $workerId) {
