@@ -46,6 +46,12 @@ class Ps
             file_put_contents($binDir . DIRECTORY_SEPARATOR . 'manager.pid', $pid);
         }
 
+        $daemonize = Config::getField('process', 'daemonize', 0);
+        if ($daemonize) {
+            //守护进程化
+            Swoole\Process::daemon();
+        }
+
         $pool = new Swoole\Process\Pool($workerNum, $ipcType, $queueKey);
         $pool->on('WorkerStart', function ($pool, $workerId) {
             $running = true;
@@ -74,6 +80,11 @@ class Ps
                 $event->message($pool, $data);
             });
         });
+
+        $listen = Config::getField('process', 'listen');
+        if (!empty($listen)) {
+            $pool->listen($listen['host'], $listen['port'], $listen['backlog'] ?? 2048);
+        }
 
         $pool->start();
     }
