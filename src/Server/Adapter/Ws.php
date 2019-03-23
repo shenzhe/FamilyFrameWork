@@ -56,7 +56,7 @@ class Ws
             WsHandler::onWorkerStart($serv, $worker_id);
         });
 
-        $http->on('WorkerError', function (swoole_server $serv, int $worker_id, int $worker_pid, int $exit_code, int $signal) {
+        $http->on('WorkerError', function (\swoole_http_server $serv, int $worker_id, int $worker_pid, int $exit_code, int $signal) {
             WsHandler::onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
         });
         $http->on('request', function (
