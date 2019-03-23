@@ -60,7 +60,7 @@ class Ps
             });
             Coroutine::create(function () use ($pool, $workerId, &$running) {
                 while ($running) {
-                    $event = new ProcessEvent();
+                    $event = new \ProcessEvent();
                     $event->workerStart($pool, $workerId);
                     sleep(Config::get('process', 'sleep_time', 0.1));
                 }
@@ -69,14 +69,14 @@ class Ps
 
         $pool->on("WorkerStop", function ($pool, $workerId) {
             Coroutine::create(function () use ($pool, $workerId) {
-                $event = new ProcessEvent();
+                $event = new \ProcessEvent();
                 $event->workerStop($pool, $workerId);
             });
         });
 
         $pool->on("Message", function ($pool, $data) {
             Coroutine::create(function () use ($pool, $data) {
-                $event = new ProcessEvent();
+                $event = new \ProcessEvent();
                 $event->message($pool, $data);
             });
         });

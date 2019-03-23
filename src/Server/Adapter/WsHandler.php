@@ -24,7 +24,7 @@ class WsHandler
     public static function onStart($serv)
     {
         if (class_exists('Event')) {
-            $event = new Event();
+            $event = new \Event();
             if (!($event instanceof Helper\EventHandler)) {
                 Log::error("event must implements Helper\EventHandler");
             } else {
@@ -72,7 +72,7 @@ class WsHandler
              * @var $event Helper\EventHandler
              */
             if (class_exists('Event')) {
-                $event = new Event();
+                $event = new \Event();
                 if (!($event instanceof Helper\EventHandler)) {
                     Log::error("event must implements Helper\EventHandler");
                 } else {
