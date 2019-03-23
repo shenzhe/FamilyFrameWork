@@ -2,6 +2,7 @@
 //file: framework/Family/family.php
 namespace Family;
 
+use Family\Core\Config;
 use Family\Core\Log;
 use Family\Server\Server;
 
@@ -36,7 +37,15 @@ class Family
 
             //先注册自动加载
             \spl_autoload_register(__CLASS__ . '::autoLoader');
-            \date_default_timezone_set('Asia/Shanghai');
+            //加载配置
+            $configDir = '';
+            $options = getopt("c::");
+            if (!empty($options['c'])) {
+                $configDir = $options['c'];
+            }
+            Config::load($configDir);
+            $timeZone = Config::get('time_zone', 'Asia/Shanghai');
+            \date_default_timezone_set($timeZone);
             //服务启动
             (new Server())->start();
         } catch (\Exception $e) {

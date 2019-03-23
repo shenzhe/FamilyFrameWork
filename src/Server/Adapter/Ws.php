@@ -14,16 +14,6 @@ class Ws
 {
     public function __construct()
     {
-        //加载配置
-        $configDir = '';
-        $options = getopt("c::");
-        if (!empty($options['c'])) {
-            $configDir = $options['c'];
-        }
-        Config::load($configDir);
-        $timeZone = Config::get('time_zone', 'Asia/Shanghai');
-        \date_default_timezone_set($timeZone);
-
         Swoole\Runtime::enableCoroutine();
 
         $http = new Swoole\WebSocket\Server(Config::get('host'), Config::get('port'));
