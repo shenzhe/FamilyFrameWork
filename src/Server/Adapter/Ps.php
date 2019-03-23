@@ -64,16 +64,16 @@ class Ps
             });
         });
 
-        $pool->on("Message", function ($pool, $data) {
-            Coroutine::create(function () use ($pool, $data) {
-                $event = new \ProcessEvent();
-                $event->message($pool, $data);
-            });
-        });
 
         $listen = Config::getField('process', 'listen');
         if (!empty($listen)) {
             $pool->listen($listen['host'], $listen['port'], $listen['backlog'] ?? 2048);
+            $pool->on("Message", function ($pool, $data) {
+                Coroutine::create(function () use ($pool, $data) {
+                    $event = new \ProcessEvent();
+                    $event->message($pool, $data);
+                });
+            });
         }
 
         $pool->start();
