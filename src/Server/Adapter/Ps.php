@@ -52,7 +52,7 @@ class Ps
                 while ($running) {
                     $event = new \ProcessEvent();
                     $event->workerStart($pool, $workerId);
-                    sleep(Config::get('process', 'sleep_time', 0.1));
+                    sleep(Config::getField('process', 'sleep_time', 0.1));
                 }
             });
         });
