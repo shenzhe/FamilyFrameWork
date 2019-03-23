@@ -41,8 +41,12 @@ class Ps
 
         $pool = new Swoole\Process\Pool($workerNum, $ipcType, $queueKey);
         $pool->on('WorkerStart', function ($pool, $workerId) {
-            Coroutine::create(function () use ($pool, $workerId) {
-                while (true) {
+            $running = true;
+            Swoole\Process::signal(SIGTERM, function () use (&$running) {
+                $running = false;
+            });
+            Coroutine::create(function () use ($pool, $workerId, &$running) {
+                while ($running) {
                     $event = new ProcessEvent();
                     $event->workerStart($pool, $workerId);
                     sleep(Config::get('process', 'sleep_time', 0.1));
