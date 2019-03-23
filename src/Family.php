@@ -46,6 +46,7 @@ class Family
             Config::load($configDir);
             $timeZone = Config::get('time_zone', 'Asia/Shanghai');
             \date_default_timezone_set($timeZone);
+            Log::init();
             //服务启动
             (new Server())->start();
         } catch (\Exception $e) {
