@@ -13,6 +13,12 @@ class Ps
 {
     public function __construct()
     {
+        if (!class_exists('ProcessEvent')) {
+            Log::error('ProcessEvent class no exits');
+            echo 'ProcessEvent class no exits';
+            return '';
+        }
+
         Swoole\Runtime::enableCoroutine();
 
         $workerNum = Config::getField('process', 'worker_num');
