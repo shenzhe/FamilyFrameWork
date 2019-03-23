@@ -51,7 +51,7 @@ class Ps
             Coroutine::create(function () use ($pool, $workerId, &$running) {
                 while ($running) {
                     $event = new \ProcessEvent();
-                    $event->workerStart($pool, $workerId);
+                    $event->workerStart($pool, $workerId, $running);
                     sleep(Config::getField('process', 'sleep_time', 0.1));
                 }
             });
