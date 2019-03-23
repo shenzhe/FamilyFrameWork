@@ -44,14 +44,14 @@ class WsHandler
     public static function onWorkerStop($serv, $worker_id)
     {
         if (self::$eventHandler) {
-            self::$eventHandler->onWorkerStop($serv, $worker_id);
+            self::$eventHandler->workerStop($serv, $worker_id);
         }
     }
 
     public static function onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal)
     {
         if (self::$eventHandler) {
-            self::$eventHandler->onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
+            self::$eventHandler->workerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
         }
     }
 
