@@ -14,6 +14,7 @@ use Family\Family;
 use Family\Pool;
 
 use Family\Helper;
+use Swoole\Server\Task;
 
 class WsHandler
 {
@@ -181,7 +182,7 @@ class WsHandler
 
     public static function onTask(
         \swoole_websocket_server $server,
-        \swoole_server_task $task
+        Task $task
     )
     {
         go(function () use ($server, $task) {

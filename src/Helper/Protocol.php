@@ -5,6 +5,7 @@ namespace Family\Helper;
 
 
 use Swoole\Http\Request;
+use Swoole\Server\Task;
 
 class Protocol
 {
@@ -22,7 +23,7 @@ class Protocol
     }
 
     public static function taskToRequest(
-        Swoole\Server\Task $task
+        Task $task
     ): Request
     {
         $request = new Request();
