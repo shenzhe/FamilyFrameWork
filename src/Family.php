@@ -19,6 +19,9 @@ class Family
      */
     public static $applicationPath;
 
+    /**
+     * @var \swoole_server
+     */
     public static $swooleServer;
 
     public static function setRootPath($rootPath)
