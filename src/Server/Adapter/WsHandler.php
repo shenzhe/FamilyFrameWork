@@ -184,40 +184,42 @@ class WsHandler
         \swoole_server_task $task
     )
     {
-        //初始化根协程ID
-        Coroutine::setBaseId();
-        //初始化上下文
-        $context = new Context(Helper\Protocol::taskToRequest($task));
-        $context->set('task', $task);
-        //存放容器pool
-        Pool\Context::getInstance()->put($context);
-        //协程退出，自动清空
-        defer(function () {
-            //清空当前pool的上下文，释放资源
-            Pool\Context::getInstance()->release();
-        });
+        go(function () use ($server, $task) {
+            //初始化根协程ID
+            Coroutine::setBaseId();
+            //初始化上下文
+            $context = new Context(Helper\Protocol::taskToRequest($task));
+            $context->set('task', $task);
+            //存放容器pool
+            Pool\Context::getInstance()->put($context);
+            //协程退出，自动清空
+            defer(function () {
+                //清空当前pool的上下文，释放资源
+                Pool\Context::getInstance()->release();
+            });
 
-        try {
-            //自动路由
-            $result = Route::dispatch();
-        } catch (\Exception $e) { //程序异常
-            $result = BaseException::exceptionHandler($e);
-        } catch (\Error $e) { //程序错误，如fatal error
-            $result = BaseException::exceptionHandler($e);
-        } catch (\Throwable $e) {  //兜底
-            $result = BaseException::exceptionHandler($e);
-        }
+            try {
+                //自动路由
+                $result = Route::dispatch();
+            } catch (\Exception $e) { //程序异常
+                $result = BaseException::exceptionHandler($e);
+            } catch (\Error $e) { //程序错误，如fatal error
+                $result = BaseException::exceptionHandler($e);
+            } catch (\Throwable $e) {  //兜底
+                $result = BaseException::exceptionHandler($e);
+            }
 
-        if (self::$eventHandler) {
-            if (method_exists(self::$eventHandler, 'taskAfter')) {
-                $ret = self::$eventHandler->taskAfter($server, $result);
-                if ($ret) {
-                    $result = $ret;
+            if (self::$eventHandler) {
+                if (method_exists(self::$eventHandler, 'taskAfter')) {
+                    $ret = self::$eventHandler->taskAfter($server, $result);
+                    if ($ret) {
+                        $result = $ret;
+                    }
                 }
             }
-        }
 
-        return $result;
+            return $result;
+        });
     }
 
     public function onFinish($server, $task_id, $data)
