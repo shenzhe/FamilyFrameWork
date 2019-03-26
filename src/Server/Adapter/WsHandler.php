@@ -10,6 +10,7 @@ use Family\Core\Route;
 use Family\Coroutine\Context;
 use Family\Coroutine\Coroutine;
 use Family\Exceptions\BaseException;
+use Family\Family;
 use Family\Pool;
 
 use Family\Helper;
@@ -64,6 +65,7 @@ class WsHandler
             }
         }
         try {
+            Family::$swooleServer = $serv;
             //加载配置，让此处加载的配置可热更新
             Config::loadLazy();
             //日志初始化
