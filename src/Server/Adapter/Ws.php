@@ -3,11 +3,8 @@
 
 namespace Family\Server\Adapter;
 
-
 use Family\Core\Config;
-use Family\Core\Log;
 use Family\Family;
-use Family\Pool;
 use Swoole;
 
 class Ws
@@ -77,6 +74,14 @@ class Ws
             \swoole_server_task $task
         ) {
             WsHandler::onTask($server, $task);
+        });
+
+        $http->on('finish', function (
+            swoole_server $server,
+            int $task_id,
+            string $data
+        ) {
+            WsHandler::onFinish($server, $task_id, $data);
         });
         $http->start();
     }

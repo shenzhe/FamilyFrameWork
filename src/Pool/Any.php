@@ -16,7 +16,7 @@ class Any implements PoolInterface
     use Singleton;
 
 
-    public function __construct($tag = null, int $length = 0, int $timeout = 0)
+    public function __construct($tag = null, $length = null, $timeout = 0)
     {
         if (empty($tag) || $length < 1) {
             throw new \Exception("tag不能为空, length不能小于1");

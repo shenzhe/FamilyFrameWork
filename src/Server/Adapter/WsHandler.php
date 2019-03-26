@@ -208,10 +208,22 @@ class WsHandler
 
         if (self::$eventHandler) {
             if (method_exists(self::$eventHandler, 'taskAfter')) {
-                self::$eventHandler->taskAfter($server, $result);
+                $ret = self::$eventHandler->taskAfter($server, $result);
+                if ($ret) {
+                    $result = $ret;
+                }
             }
         }
 
         return $result;
+    }
+
+    public function onFinish($server, $task_id, $data)
+    {
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'finish')) {
+                self::$eventHandler->finish($server, $task_id, $data);
+            }
+        }
     }
 }
