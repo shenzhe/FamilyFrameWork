@@ -219,7 +219,7 @@ class WsHandler
                 }
             }
 
-            return $result;
+            $task->finish($result);
         });
     }
 
