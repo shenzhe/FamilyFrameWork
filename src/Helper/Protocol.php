@@ -4,6 +4,7 @@
 namespace Family\Helper;
 
 
+use Family\Core\Config;
 use Swoole\Http\Request;
 use Swoole\Server\Task;
 
@@ -27,8 +28,10 @@ class Protocol
     ): Request
     {
         $request = new Request();
-        $request->server['http_method'] = 'POST';
+        $request->server['request_method'] = 'POST';
         $request->server['path_info'] = '/task';
+        $request->server['server_protocol'] = 'HTTP/1.1';
+        $request->server['server_port'] = Config::get('port');
         $request->post = $task->data;
         return $request;
     }
