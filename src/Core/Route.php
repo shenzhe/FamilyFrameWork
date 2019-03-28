@@ -95,7 +95,7 @@ class Route
                 }
             } elseif (is_callable($routeInfo[1])) {
                 //回调函数，直接执行
-                $result = $routeInfo[1](...$routeInfo[2]);
+                $result = $routeInfo[1]($request, $context->getResponse(), ...$routeInfo[2]);
             } else {
                 throw new RouterException('router error');
             }

@@ -34,7 +34,7 @@ class Ps
         $ipcType = Config::getField('process', 'ipc_type', 0);
 
         $queueKey = Config::getField('process', 'msgqueue_key', 0);
-        $binDir = Family::$applicationPath . DIRECTORY_SEPARATOR . 'bin';
+        $binDir = Family::$applicationPath . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'bin';
         if (is_dir($binDir)) {
             //写入进程id
             $pid = posix_getpid();
