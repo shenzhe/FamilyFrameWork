@@ -44,6 +44,13 @@ class Ps
 
         $pool = new Swoole\Process\Pool($workerNum, $ipcType, $queueKey);
         $pool->on('WorkerStart', function ($pool, $workerId) {
+            if ('Darwin' !== PHP_OS) {
+                $title = sprintf("worker process, id:%d, running:%s",
+                    $workerId,
+                    date("Y-m-d H:i:s")
+                );
+                swoole_set_process_name($title);
+            }
             $running = true;
             Swoole\Process::signal(SIGTERM, function () use (&$running) {
                 $running = false;
@@ -75,6 +82,14 @@ class Ps
                 });
             });
         }
+
+        if ('Darwin' !== PHP_OS) {
+            $title = sprintf("master process, running:%s",
+                date("Y-m-d H:i:s")
+            );
+            swoole_set_process_name($title);
+        }
+
 
         $pool->start();
     }

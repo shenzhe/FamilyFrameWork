@@ -34,12 +34,47 @@ class WsHandler
                 $event->start($serv);
             }
         }
+
+        if ('Darwin' !== PHP_OS) {
+            $title = sprintf("master, ws://%s:%d, running:%s",
+                Config::get('host'),
+                Config::get('port'),
+                date("Y-m-d H:i:s")
+            );
+            swoole_set_process_name($title);
+        }
     }
 
     public static function onShutDown($serv)
     {
         if (self::$eventHandler) {
             self::$eventHandler->shutdown($serv);
+        }
+    }
+
+    public static function onManagerStart($serv)
+    {
+        if ('Darwin' !== PHP_OS) {
+            $title = sprintf("%s, running:%s",
+                'manager',
+                date("Y-m-d H:i:s")
+            );
+            swoole_set_process_name($title);
+        }
+
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'managerStart')) {
+                self::$eventHandler->managerStart($serv);
+            }
+        }
+    }
+
+    public static function onManagerStop($serv)
+    {
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'managerStop')) {
+                self::$eventHandler->managerStop($serv);
+            }
         }
     }
 
@@ -66,6 +101,19 @@ class WsHandler
             }
         }
         try {
+            if ('Darwin' !== PHP_OS) {
+                $workerNum = Config::getField('swoole_setting', 'worker_num');
+                $isTask = 0;
+                if ($worker_id >= $workerNum) {
+                    $isTask = 1;
+                }
+                $title = sprintf("%s, id:%d, running:%s",
+                    $isTask ? 'task' : 'worker',
+                    $isTask ? ($worker_id - $workerNum) : $worker_id,
+                    date("Y-m-d H:i:s")
+                );
+                swoole_set_process_name($title);
+            }
             Family::$swooleServer = $serv;
             //加载配置，让此处加载的配置可热更新
             Config::loadLazy();

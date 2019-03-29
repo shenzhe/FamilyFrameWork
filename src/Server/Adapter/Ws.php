@@ -45,6 +45,10 @@ class Ws
             WsHandler::onShutDown($serv);
         });
 
+        $http->on('managerStart', function($serv) {
+            WsHandler::onManagerStart($serv);
+        });
+
         $http->on('workerStop', function (\swoole_http_server $serv, int $worker_id) {
             WsHandler::onWorkerStop($serv, $worker_id);
         });
