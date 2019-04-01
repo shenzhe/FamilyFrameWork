@@ -200,8 +200,18 @@ abstract class Dao
      */
     public function add($array)
     {
-        $strFields = '`' . implode('`,`', array_keys($array)) . '`';
-        $strValues = "'" . implode("','", array_values($array)) . "'";
+
+        $keys = [];
+        $values = [];
+        foreach ($array as $key => $value) {
+            if (is_null($value) || is_null($key)) {
+                continue;
+            }
+            $keys[] = $key;
+            $values[] = $value;
+        }
+        $strFields = '`' . implode('`,`', array_keys($keys)) . '`';
+        $strValues = "'" . implode("','", array_values($values)) . "'";
         $query = "INSERT INTO {$this->getLibName()} ({$strFields}) VALUES ({$strValues})";
         $result = $this->getDb()->query($query);
         if (!empty($result['insert_id'])) {
