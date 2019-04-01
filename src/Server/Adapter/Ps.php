@@ -5,12 +5,16 @@ namespace Family\Server\Adapter;
 
 
 use Family\Core\Config;
+use Family\Core\Log;
 use Family\Coroutine\Coroutine;
 use Family\Family;
 use Swoole;
 
 class Ps
 {
+
+    public static $running = 1;
+
     public function __construct()
     {
         if (!class_exists('ProcessEvent')) {
@@ -51,14 +55,17 @@ class Ps
                 );
                 swoole_set_process_name($title);
             }
-            $running = true;
-            Swoole\Process::signal(SIGTERM, function () use (&$running) {
-                $running = false;
+            Swoole\Process::signal(SIGTERM, function () {
+                self::$running = 0;
             });
-            Coroutine::create(function () use ($pool, $workerId, &$running) {
-                while ($running) {
+            Coroutine::create(function () use ($pool, $workerId) {
+                while (true) {
+                    if (!self::$running) {
+                        //会执行完当前任务，优雅退出
+                        exit();
+                    }
                     $event = new \ProcessEvent();
-                    $event->workerStart($pool, $workerId, $running);
+                    $event->workerStart($pool, $workerId);
                     sleep(Config::getField('process', 'sleep_time', 0.1));
                 }
             });

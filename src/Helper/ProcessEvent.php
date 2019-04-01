@@ -11,7 +11,7 @@ class ProcessEvent implements ProcessEventHandler
     use Singleton;
 
 
-    public function workerStart($pool, $worker_id, $running)
+    public function workerStart($pool, $worker_id)
     {
         // TODO: Implement workerStart() method.
     }
