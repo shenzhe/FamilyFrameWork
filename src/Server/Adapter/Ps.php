@@ -66,6 +66,10 @@ class Ps
                     }
                     $event = new \ProcessEvent();
                     $event->workerStart($pool, $workerId);
+                    if (!self::$running) {
+                        //会执行完当前任务，优雅退出
+                        exit();
+                    }
                     sleep(Config::getField('process', 'sleep_time', 0.1));
                 }
             });
