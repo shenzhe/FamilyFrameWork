@@ -35,12 +35,12 @@ class Event implements EventHandler
         // TODO: Implement workerError() method.
     }
 
-    public function onRequest()
+    public function onRequest($request)
     {
         // TODO: Implement onRequest() method.
     }
 
-    public function requestAfter($result)
+    public function requestAfter($request, $response, $result)
     {
         // TODO: Implement requestAfter() method.
     }
