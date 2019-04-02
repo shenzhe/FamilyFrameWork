@@ -146,7 +146,7 @@ class WsHandler
     )
     {
         if (self::$eventHandler) {
-            self::$eventHandler->onRequest();
+            self::$eventHandler->onRequest($request);
         }
         if ('OPTIONS' === strtoupper($request->server['request_method'])) {
             $allowMethod = Config::get('allow_http_method', 'GET, HEAD, PUT, DELETE, POST, OPTIONS');
@@ -183,7 +183,7 @@ class WsHandler
         //记录请求日志
         Log::access($request);
         if (self::$eventHandler) {
-            $ret = self::$eventHandler->requestAfter($result);
+            $ret = self::$eventHandler->requestAfter($request, $result);
             if ($ret) {
                 $result = $ret;
             }
