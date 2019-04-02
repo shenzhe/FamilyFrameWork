@@ -183,7 +183,7 @@ class WsHandler
         //记录请求日志
         Log::access($request);
         if (self::$eventHandler) {
-            $ret = self::$eventHandler->requestAfter($request, $result);
+            $ret = self::$eventHandler->requestAfter($request, $response, $result);
             if ($ret) {
                 $result = $ret;
             }

@@ -22,10 +22,10 @@ interface EventHandler
     public function workerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
 
     //请求到达时回调
-    public function onRequest();
+    public function onRequest($request);
 
     //请求结束后回调
-    public function requestAfter($result);
+    public function requestAfter($request, $response, $result);
 
     //webscoket请求结束后回调
     public function messageAfter($serv, $result);
