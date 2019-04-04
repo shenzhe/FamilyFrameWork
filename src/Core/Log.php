@@ -171,34 +171,38 @@ class Log
      */
     public static function exception(\Throwable $e)
     {
-        $array = [
-            '{file}' => $e->getFile(),
-            '{line}' => $e->getLine(),
-            '{code}' => $e->getCode(),
-            '{message}' => $e->getMessage(),
-            '{trace}' => $e->getTraceAsString(),
-        ];
-        $message = implode(' | ', array_keys($array));
-        self::emergency($message, $array);
+        if (self::$seaslog && self::$level > 0) {
+            $array = [
+                '{file}' => $e->getFile(),
+                '{line}' => $e->getLine(),
+                '{code}' => $e->getCode(),
+                '{message}' => $e->getMessage(),
+                '{trace}' => $e->getTraceAsString(),
+            ];
+            $message = implode(' | ', array_keys($array));
+            self::emergency($message, $array);
+        }
     }
 
     public static function access(\swoole_http_request $request)
     {
-        Log::info(
-            json_encode([
-                    "@timestamp" => time(),
-                    "app" => Config::get('app_name'), // 应用名称
-                    "method" => $request->server['request_method'], // 请求方法
-                    "request_uri" => $request->server['request_uri'], // 请求地址（带参数）
-                    "request_body" => $request->rawContent() ?? '', // 请求体
-                    "X-SSPP-UID" => $request->header['X-SSPP-UID'] ?? '', // 伪UID，直接从http header获取
-                    "X-B3-TraceId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
-                    "X-B3-SpanId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
-                    "X-B3-ParentSpanId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
-                    "reqIp" => $request->header['X-Forwarded-For'] ?? '', // 用户ip，从http header[X-Forwarded-For]获取
-                    "status" => 200, // 本次请求返回的状态码
-                    "request_time" => (microtime(true) - $request->server['request_time_float'])// 本次请求响应时间，单位ms
-                ]
-            ));
+        if (self::$seaslog && self::$level > 6) {
+            Log::info(
+                json_encode([
+                        "@timestamp" => time(),
+                        "app" => Config::get('app_name'), // 应用名称
+                        "method" => $request->server['request_method'], // 请求方法
+                        "request_uri" => $request->server['request_uri'], // 请求地址（带参数）
+                        "request_body" => $request->rawContent() ?? '', // 请求体
+                        "X-SSPP-UID" => $request->header['X-SSPP-UID'] ?? '', // 伪UID，直接从http header获取
+                        "X-B3-TraceId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
+                        "X-B3-SpanId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
+                        "X-B3-ParentSpanId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
+                        "reqIp" => $request->header['X-Forwarded-For'] ?? '', // 用户ip，从http header[X-Forwarded-For]获取
+                        "status" => 200, // 本次请求返回的状态码
+                        "request_time" => (microtime(true) - $request->server['request_time_float'])// 本次请求响应时间，单位ms
+                    ]
+                ));
+        }
     }
 }

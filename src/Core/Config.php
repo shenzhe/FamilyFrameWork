@@ -56,7 +56,10 @@ class Config
                         continue;
                     }
                     $filename = $dir . DS . $file;
-                    self::$configMap += include "{$filename}";
+                    $_conf = include "{$filename}";
+                    if (is_array($_conf)) {
+                        self::$configMap += $_conf;
+                    }
                 }
             }
         }
