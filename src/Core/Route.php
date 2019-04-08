@@ -28,6 +28,18 @@ class Route
         if ('/favicon.ico' == $path) {
             return '';
         }
+
+        //静态路由
+        $sr = Config::get('static_router');
+        if (!empty($sr)) {
+            if (isset($sr[$path])) { //找到方法
+                if (in_array($httpMethod, $sr[$path][0])) {
+                    return self::_go($request, $sr[$path][1], $sr[$path[2]]);
+                }
+                throw new RouterException(RouterException::METHOD_NOT_ALLOWED);
+            }
+        }
+
         $r = Config::get('router');
         //没有路由配置或者配置不可执行，则走默认路由
         if (empty($r) || !is_callable($r)) {
@@ -39,7 +51,6 @@ class Route
         $dispatcher = simpleDispatcher($r);
         $routeInfo = $dispatcher->dispatch($httpMethod, $path);
 
-
         //匹配到了
         if (Dispatcher::FOUND === $routeInfo[0]) {
             //匹配的是数组, 格式：['controllerName', 'MethodName']
@@ -49,18 +60,7 @@ class Route
                     $params = $request->getQueryParams() + $routeInfo[2];
                     $request->withQueryParams($params);
                 }
-                $request->withAttribute(Controller::_CONTROLLER_KEY_, $routeInfo[1][0]);
-                $request->withAttribute(Controller::_METHOD_KEY_, $routeInfo[1][1]);
-                $controllerName = "controller\\" . $routeInfo[1][0];
-                $controller = new $controllerName();
-                $methodName = $routeInfo[1][1];
-                try {
-                    $controller->_before();
-                    $result = $controller->$methodName();
-                } catch (\Throwable $t) {
-                    $controller->_after(); //after必需执行
-                    throw $t;
-                }
+                $result = self::_go($request, $routeInfo[1][0], $routeInfo[1][1]);
             } elseif (is_string($routeInfo[1])) {
                 //字符串, 格式：controllerName@MethodName
                 list($controllerName, $methodName) = explode('@', $routeInfo[1]);
@@ -82,17 +82,7 @@ class Route
                         $request->withQueryParams($params);
                     }
                 }
-                $request->withAttribute(Controller::_CONTROLLER_KEY_, $controllerName);
-                $request->withAttribute(Controller::_METHOD_KEY_, $methodName);
-                $controllerName = "controller\\" . $controllerName;
-                $controller = new $controllerName();
-                try {
-                    $controller->_before();
-                    $result = $controller->$methodName();
-                } catch (\Throwable $t) {
-                    $controller->_after(); //after必需执行
-                    throw $t;
-                }
+                $result = self::_go($request, $controllerName, $methodName);
             } elseif (is_callable($routeInfo[1])) {
                 //回调函数，直接执行
                 $result = $routeInfo[1]($request, $context->getResponse(), ...$routeInfo[2]);
@@ -144,6 +134,12 @@ class Route
                 }
             }
         }
+
+        return self::_go($request, $controllerName, $methodName);
+    }
+
+    private static function _go($request, $controllerName, $methodName)
+    {
         $request->withAttribute(Controller::_CONTROLLER_KEY_, $controllerName);
         $controllerName = "controller\\{$controllerName}";
         $request->withAttribute(Controller::_METHOD_KEY_, $methodName);
