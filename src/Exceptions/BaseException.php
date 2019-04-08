@@ -37,7 +37,7 @@ class BaseException extends \Exception
             return self::display(array(
                 'className' => get_class($exception),
                 'message' => $exception->getMessage(),
-                'code' => $exception->getCode(),
+                'code' => $exception->getCode() ?: -1,
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine()
             ));
