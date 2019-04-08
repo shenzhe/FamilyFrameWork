@@ -34,7 +34,7 @@ class Route
         if (!empty($sr)) {
             if (isset($sr[$path])) { //找到方法
                 if (in_array($httpMethod, $sr[$path][0])) {
-                    return self::_go($request, $sr[$path][1], $sr[$path[2]]);
+                    return self::_go($request, $sr[$path][1], $sr[$path][2]);
                 }
                 throw new RouterException(RouterException::METHOD_NOT_ALLOWED);
             }

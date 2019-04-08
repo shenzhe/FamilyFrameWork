@@ -105,6 +105,39 @@ class Mysql
     }
 
     /**
+     * @param $sql
+     * @return mixed
+     * @desc 利用__call,实现操作mysql,并能做断线重连等相关检测
+     * @throws \Exception
+     */
+    public function query($sql)
+    {
+        $res = $this->chooseDb($sql);
+        $db = $res['db'];
+        $time = microtime(true);
+        $result = $db->query($sql);
+        Log::debug($sql . ':' . (microtime(true) - $time));
+        if (false === $result) {
+            Log::warning('mysql query:{sql} false', ['{sql}' => $sql]);
+            if (!$db->connected) { //断线重连
+                $db = $this->reconnect($res['type'], $res['index']);
+                $time = microtime(true);
+                $result = $db->query($sql);
+                Log::debug($sql . ':' . (microtime(true) - $time));
+                return $this->parseResult($result, $db);
+            }
+
+            if (!empty($db->errno)) {  //有错误码，则抛出弃常
+                throw new MysqlException(MysqlException::QUERY_ERROR, [
+                        'msg' => $db->error,
+                        'code' => $db->errno]
+                );
+            }
+        }
+        return $this->parseResult($result, $db);
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed
