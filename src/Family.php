@@ -55,11 +55,11 @@ class Family
             //服务启动
             (new Server())->start();
         } catch (\Exception $e) {
-            Log::exception($e->getMessage());
+            Log::exception($e);
 //            echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL;
             print_r($e);
         } catch (\Throwable $throwable) {
-            Log::exception($throwable->getMessage());
+            Log::exception($throwable);
 //            echo $throwable->getCode() . ':' . $throwable->getMessage() . PHP_EOL;
             print_r($throwable);
         }
