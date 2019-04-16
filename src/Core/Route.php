@@ -87,7 +87,7 @@ class Route
                 //回调函数，直接执行
                 $result = $routeInfo[1]($request, $context->getResponse(), ...$routeInfo[2]);
             } else {
-                throw new RouterException('router error');
+                throw new RouterException();
             }
 
             return $result;

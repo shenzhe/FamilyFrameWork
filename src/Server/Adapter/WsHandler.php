@@ -180,8 +180,7 @@ class WsHandler
             $exceptionHandler = Config::get('exception_handler', BaseException::class);
             $result = forward_static_call([$exceptionHandler, 'exceptionHandler'], $e);
         }
-        //记录请求日志
-        Log::access($request);
+        
         if (self::$eventHandler) {
             $ret = self::$eventHandler->requestAfter($request, $response, $result);
             if ($ret) {

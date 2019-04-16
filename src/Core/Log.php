@@ -195,9 +195,9 @@ class Log
                         "request_uri" => $request->server['request_uri'], // 请求地址（带参数）
                         "request_body" => $request->rawContent() ?? '', // 请求体
                         "X-SSPP-UID" => $request->header['X-SSPP-UID'] ?? '', // 伪UID，直接从http header获取
-                        "X-B3-TraceId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
-                        "X-B3-SpanId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
-                        "X-B3-ParentSpanId" => $request->header['X-SSPP-UID'] ?? '', // 集成sleuth
+                        "X-B3-TraceId" => $request->header[ 'X-B3-TraceId'] ?? '', // 集成sleuth
+                        "X-B3-SpanId" => $request->header[ 'X-B3-SpanId'] ?? '', // 集成sleuth
+                        "X-B3-ParentSpanId" => $request->header[ 'X-B3-ParentSpanId'] ?? '', // 集成sleuth
                         "reqIp" => $request->header['X-Forwarded-For'] ?? '', // 用户ip，从http header[X-Forwarded-For]获取
                         "status" => 200, // 本次请求返回的状态码
                         "request_time" => (microtime(true) - $request->server['request_time_float'])// 本次请求响应时间，单位ms
