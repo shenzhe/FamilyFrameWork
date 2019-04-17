@@ -74,11 +74,10 @@ class Redis
         Log::debug($name . ':' . (microtime(true) - $time));
         if (false === $result) {
             if (!$this->redis->connected) { //断线重连
-                $db = $this->connect($this->config);
+                $this->connect($this->config);
                 $time = microtime(true);
                 $result = call_user_func_array([$this->redis, $name], $arguments);
                 Log::debug($name . ':' . (microtime(true) - $time));
-                return $result;
             }
 
             if (!empty($this->redis->errCode)) {  //有错误码，则抛出弃常
