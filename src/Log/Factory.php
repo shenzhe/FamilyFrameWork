@@ -8,11 +8,13 @@ class Factory
 {
     use Singleton;
 
+    private $logger;
+
     public function __construct()
     {
         $config = Config::get('log');
         $adapter = $config['adapter'] ?? 'File';
         $className = __NAMESPACE__ . "\\Adapter\\{$adapter}";
-        return new $className($config);
+        $this->logger =  new $className($config);
     }
 }

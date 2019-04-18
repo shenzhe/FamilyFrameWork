@@ -3,7 +3,7 @@
 namespace Family\Core;
 
 
-use Family\Log\Log\Factory;
+use Family\Log\Factory;
 
 class Log
 {
@@ -12,7 +12,7 @@ class Log
     //设置日志目录
     public static function init()
     {
-        self::$logger = Factory::getInstance();
+        self::$logger = Factory::getInstance()->logger;
     }
 
 

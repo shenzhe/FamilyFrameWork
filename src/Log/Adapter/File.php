@@ -22,7 +22,7 @@ class File extends Base
      * @throws \Exception
      * @desc {type} | {timeStamp} |{dateTime} | {$message}
      */
-    public function log($level, $message, array $context = array(), $original = 0)
+    public function log($level, $message, array $context = null, $original = 0)
     {
         $logLevel = $this->_config['level'] ?? Level::ALL;
         if (isset(Level::$levels[$level]) && Level::$levels[$level] >= $logLevel) {
