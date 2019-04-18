@@ -15,6 +15,15 @@ class Log
         self::$logger = (new Factory())->logger;
     }
 
+    public static function getLogger()
+    {
+        if (empty(self::$logger)) {
+            self::init();
+        }
+
+        return self::$logger;
+    }
+
 
     /**
      * 记录debug日志

@@ -10,9 +10,9 @@ class Factory
 
     public $logger;
 
-    public function __construct()
+    public function __construct($config = null)
     {
-        $config = Config::get('log');
+        $config = $config ?: Config::get('log');
         $adapter = $config['adapter'] ?? 'File';
         $className = __NAMESPACE__ . "\\Adapter\\{$adapter}";
         $this->logger =  new $className($config);
