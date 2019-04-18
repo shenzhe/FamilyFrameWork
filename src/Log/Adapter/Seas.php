@@ -20,7 +20,7 @@ class Seas
     }
 
     //代理seaglog的静态方法，如 SeasLog::debug
-    public function __callStatic($name, $arguments)
+    public function __call($name, $arguments)
     {
         if ($this->seaslog) {
             forward_static_call_array(['SeasLog', $name], $arguments);
