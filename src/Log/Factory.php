@@ -8,7 +8,7 @@ class Factory
 {
     use Singleton;
 
-    private $logger;
+    public $logger;
 
     public function __construct()
     {

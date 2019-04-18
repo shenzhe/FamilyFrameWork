@@ -12,7 +12,7 @@ class Log
     //设置日志目录
     public static function init()
     {
-        self::$logger = Factory::getInstance()->logger;
+        self::$logger = (new Factory())->logger;
     }
 
 
