@@ -38,7 +38,8 @@ class File extends Base
             }
             $str =  date('Y-m-d H:i:s') . self::SEPARATOR . $message;
         }
-        $dir = $this->_config['default_basepath'] . DS . date('Ymd');
+        $baseDir = $this->_config['default_basepath'] ?: '/tmp';
+        $dir =  $baseDir . DS . date('Ymd');
         if (!is_dir($dir)) {
             mkdir($dir);
         }
