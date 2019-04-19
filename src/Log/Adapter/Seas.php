@@ -1,5 +1,5 @@
 <?php
-namespace Family\Log\Adapter\Seas;
+namespace Family\Log\Adapter;
 
 
 use \SeasLog;
