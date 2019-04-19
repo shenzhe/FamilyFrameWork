@@ -8,6 +8,8 @@ class File extends Base
 {
     private $_config;
     const SEPARATOR = ' | ';
+    private $fp = null;
+    private $fn = null;
     public function __construct($config)
     {
         if (!empty($config)) {
@@ -39,12 +41,20 @@ class File extends Base
             $str =  date('Y-m-d H:i:s') . self::SEPARATOR . $message;
         }
         $baseDir = $this->_config['default_basepath'] ?: '/tmp';
-        $dir =  $baseDir . DS . date('Ymd');
-        if (!is_dir($dir)) {
-            mkdir($dir);
+        $logFile = $baseDir . DS . date('Ymd') . '.' . $level . '.log';
+
+        if (!empty($this->fn) && $logFile !== $this->fn) {
+            fclose($this->fp);
+            $this->fp = null;
+            $this->fn = null;
         }
-        $logFile = $dir . DS . $level . '.log';
-        \file_put_contents($logFile, $str . "\n", FILE_APPEND | LOCK_EX);
+
+        if (empty($this->fp) || !is_resource($this->fp)) {
+            $this->fp = fopen($logFile, 'a');
+            $this->fn = $logFile;
+        }
+
+        fwrite($this->fp, $str . "\n");
 
         return true;
     }
