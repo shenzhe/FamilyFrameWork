@@ -30,14 +30,16 @@ class File extends Base
         if (isset(Level::$levels[$level]) && Level::$levels[$level] >= $logLevel) {
             return true;
         }
+
+        if (!empty($context)) {
+            foreach ($context as $key => $val) {
+                $message = str_replace('{' . $key . '}', $val, $message);
+            }
+        }
+
         if ($original) {
             $str = $message;
         } else {
-            if (empty($context)) {
-                foreach ($context as $key => $val) {
-                    $message = str_replace('{' . $key . '}', $val, $message);
-                }
-            }
             $str =  date('Y-m-d H:i:s') . self::SEPARATOR . $message;
         }
         $baseDir = $this->_config['default_basepath'] ?: '/tmp';
