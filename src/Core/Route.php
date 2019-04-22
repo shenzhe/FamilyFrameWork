@@ -34,6 +34,9 @@ class Route
         if (!empty($sr)) {
             if (isset($sr[$path])) { //找到方法
                 if (in_array($httpMethod, $sr[$path][0])) {
+                    if (is_callable($sr[$path][1])) {
+                        return $sr[$path][1]($request, $context->getResponse(), ...$$sr[$path][2]);
+                    }
                     return self::_go($request, $sr[$path][1], $sr[$path][2]);
                 }
                 throw new RouterException(RouterException::METHOD_NOT_ALLOWED);
@@ -44,7 +47,6 @@ class Route
         //没有路由配置或者配置不可执行，则走默认路由
         if (empty($r) || !is_callable($r)) {
             return self::normal($path, $request);
-
         }
 
         //引入fastrouter，进行路由检测
@@ -97,7 +99,6 @@ class Route
         if (Dispatcher::NOT_FOUND === $routeInfo[0]) {
 
             return self::normal($path, $request);
-
         }
 
         //匹配到了，但不允许的http method
