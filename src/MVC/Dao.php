@@ -180,6 +180,8 @@ abstract class Dao
      */
     public function fetchArray($where = '1', $fields = '*', $orderBy = null, $limit = 0)
     {
+        $db = $this->getDb();
+        $where = $db->escape($where);
         $query = "SELECT {$fields} FROM {$this->getLibName()} WHERE {$where}";
 
         if ($orderBy) {
@@ -189,7 +191,7 @@ abstract class Dao
         if ($limit) {
             $query .= " limit {$limit}";
         }
-        return $this->getDb()->query($query);
+        return $db->query($query);
     }
 
     /**
@@ -201,6 +203,7 @@ abstract class Dao
     public function add($array)
     {
 
+        $db = $this->getDb();
         $keys = [];
         $values = [];
         foreach ($array as $key => $value) {
@@ -208,12 +211,12 @@ abstract class Dao
                 continue;
             }
             $keys[] = $key;
-            $values[] = $value;
+            $values[] = $db->escape($value);
         }
         $strFields = '`' . implode('`,`', $keys) . '`';
         $strValues = "'" . implode("','", $values) . "'";
         $query = "INSERT INTO {$this->getLibName()} ({$strFields}) VALUES ({$strValues})";
-        $result = $this->getDb()->query($query);
+        $result = $db->query($query);
         if (!empty($result['insert_id'])) {
             return $result['insert_id'];
         }
@@ -234,12 +237,14 @@ abstract class Dao
             throw new MysqlException(MysqlException::UPDATE_NO_WHERE);
         }
         $strUpdateFields = '';
+        $db = $this->getDb();
         foreach ($array as $key => $value) {
+            $value = $db->escape($value);
             $strUpdateFields .= "`{$key}` = '{$value}',";
         }
         $strUpdateFields = rtrim($strUpdateFields, ',');
         $query = "UPDATE {$this->getLibName()} SET {$strUpdateFields} WHERE {$where}";
-        $result = $this->getDb()->query($query);
+        $result = $db->query($query);
         return $result['affected_rows'];
     }
 
@@ -254,9 +259,10 @@ abstract class Dao
         if (empty($where)) {
             throw new MysqlException(MysqlException::DELETE_NO_WHERE);
         }
-
+        $db = $this->getDb();
+        $where = $db->escape($where);
         $query = "DELETE FROM {$this->getLibName()} WHERE {$where}";
-        $result = $this->getDb()->query($query);
+        $result = $db->query($query);
         return $result['affected_rows'];
     }
 }
