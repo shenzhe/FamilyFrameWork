@@ -80,6 +80,14 @@ class Ws
             WsHandler::onOpen($server, $request);
         });
 
+        $http->on('close', function (
+            swoole_websocket_server $server,
+            int $fd,
+            int $reactorId
+        ) {
+            WsHandler::onClose($server, $fd, $reactorId);
+        });
+
         $http->on('task', function (
             \swoole_websocket_server $server,
             \swoole_server_task $task

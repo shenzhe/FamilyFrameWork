@@ -238,6 +238,18 @@ class WsHandler
         }
     }
 
+    public static function onClose(
+        swoole_websocket_server $server,
+        int $fd,
+        int $reactorId
+    ) {
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'close')) {
+                self::$eventHandler->open($server, $fd, $reactorId);
+            }
+        }
+    }
+
     public static function onTask(
         \swoole_websocket_server $server,
         Task $task
