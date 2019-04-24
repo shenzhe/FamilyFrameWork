@@ -6,7 +6,7 @@ namespace Family\Helper;
 
 interface EventHandler
 {
-    //服务启动回调s
+    //服务启动回调
     public function start($serv);
 
     //服务关闭回调
@@ -28,7 +28,7 @@ interface EventHandler
     public function requestAfter($request, $response, $result);
 
     //webscoket请求结束后回调
-    public function messageAfter($serv, $result);
+    public function messageAfter($serv, $frame, $result);
 
     //task请求结束后回调
     public function taskAfter($serv, $result);

@@ -23,15 +23,15 @@ class Ws
             }
             //服务启动
             //日志初始化
-//            Log::init();
+            //            Log::init();
             file_put_contents(Family::$rootPath . DS . 'bin' . DS . 'master.pid', $serv->master_pid);
             file_put_contents(Family::$rootPath . DS . 'bin' . DS . 'manager.pid', $serv->manager_pid);
-//            Log::info("http server starting! {host}: {port}, masterId:{masterId}, managerId: {managerId}", [
-//                '{host}' => Config::get('host'),
-//                '{port}' => Config::get('port'),
-//                '{masterId}' => $serv->master_pid,
-//                '{managerId}' => $serv->manager_pid,
-//            ]);
+            //            Log::info("http server starting! {host}: {port}, masterId:{masterId}, managerId: {managerId}", [
+            //                '{host}' => Config::get('host'),
+            //                '{port}' => Config::get('port'),
+            //                '{masterId}' => $serv->master_pid,
+            //                '{managerId}' => $serv->manager_pid,
+            //            ]);
             echo "http server staring! ://" . Config::get('host') . ":" . Config::get('port');
             WsHandler::onStart($serv);
         });
@@ -40,12 +40,12 @@ class Ws
             //服务关闭，删除进程id
             unlink(Family::$rootPath . DS . 'bin' . DS . 'master.pid');
             unlink(Family::$rootPath . DS . 'bin' . DS . 'manager.pid');
-//            Log::info("http server shutdown");
+            //            Log::info("http server shutdown");
             echo "http server shutdown";
             WsHandler::onShutDown($serv);
         });
 
-        $http->on('managerStart', function($serv) {
+        $http->on('managerStart', function ($serv) {
             WsHandler::onManagerStart($serv);
         });
 
@@ -71,6 +71,13 @@ class Ws
             \swoole_websocket_frame $frame
         ) {
             WsHandler::onMessage($server, $frame);
+        });
+
+        $http->on('open', function (
+            swoole_websocket_server $server,
+            swoole_http_request $request
+        ) {
+            WsHandler::onOpen($server, $request);
         });
 
         $http->on('task', function (

@@ -36,7 +36,8 @@ class WsHandler
         }
 
         if ('Darwin' !== PHP_OS) {
-            $title = sprintf("master, ws://%s:%d, running:%s",
+            $title = sprintf(
+                "master, ws://%s:%d, running:%s",
                 Config::get('host'),
                 Config::get('port'),
                 date("Y-m-d H:i:s")
@@ -55,7 +56,8 @@ class WsHandler
     public static function onManagerStart($serv)
     {
         if ('Darwin' !== PHP_OS) {
-            $title = sprintf("%s, running:%s",
+            $title = sprintf(
+                "%s, running:%s",
                 'manager',
                 date("Y-m-d H:i:s")
             );
@@ -107,7 +109,8 @@ class WsHandler
                 if ($worker_id >= $workerNum) {
                     $isTask = 1;
                 }
-                $title = sprintf("%s, id:%d, running:%s",
+                $title = sprintf(
+                    "%s, id:%d, running:%s",
                     $isTask ? 'task' : 'worker',
                     $isTask ? ($worker_id - $workerNum) : $worker_id,
                     date("Y-m-d H:i:s")
@@ -143,8 +146,7 @@ class WsHandler
     public static function onRequest(
         \swoole_http_request $request,
         \swoole_http_response $response
-    )
-    {
+    ) {
         if (self::$eventHandler) {
             self::$eventHandler->onRequest($request);
         }
@@ -180,7 +182,7 @@ class WsHandler
             $exceptionHandler = Config::get('exception_handler', BaseException::class);
             $result = forward_static_call([$exceptionHandler, 'exceptionHandler'], $e);
         }
-        
+
         if (self::$eventHandler) {
             $ret = self::$eventHandler->requestAfter($request, $response, $result);
             if ($ret) {
@@ -194,8 +196,7 @@ class WsHandler
     public static function onMessage(
         \swoole_websocket_server $server,
         \swoole_websocket_frame $frame
-    )
-    {
+    ) {
         //初始化根协程ID
         Coroutine::setBaseId();
         //初始化上下文
@@ -221,17 +222,26 @@ class WsHandler
         }
 
         if (self::$eventHandler) {
-            self::$eventHandler->messageAfter($server, $result);
+            self::$eventHandler->messageAfter($server, $frame, $result);
         }
+    }
 
-        $server->push($frame->fd, $result);
+
+    public static function onOpen(
+        swoole_websocket_server $server,
+        swoole_http_request $request
+    ) {
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'open')) {
+                self::$eventHandler->open($server, $request);
+            }
+        }
     }
 
     public static function onTask(
         \swoole_websocket_server $server,
         Task $task
-    )
-    {
+    ) {
         go(function () use ($server, $task) {
             //初始化根协程ID
             Coroutine::setBaseId();

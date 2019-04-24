@@ -45,9 +45,10 @@ class Event implements EventHandler
         // TODO: Implement requestAfter() method.
     }
 
-    public function messageAfter($serv, $result)
+    public function messageAfter($serv, $frame, $result)
     {
         // TODO: Implement messageAfter() method.
+        $serv->push($frame->fd, $result);
     }
 
     public function taskAfter($serv, $result)
