@@ -8,7 +8,7 @@ use Family\Db\Mysql;
 use Family\Exceptions\MysqlException;
 use Family\Pool\Mysql as MysqlPool;
 use Family\Coroutine\Coroutine;
-
+use Family\Core\Log;
 
 abstract class Dao
 {
@@ -191,6 +191,7 @@ abstract class Dao
         if ($limit) {
             $query .= " limit {$limit}";
         }
+        Log::debug('sql:'.$query);
         return $db->query($query);
     }
 
@@ -216,6 +217,7 @@ abstract class Dao
         $strFields = '`' . implode('`,`', $keys) . '`';
         $strValues = "'" . implode("','", $values) . "'";
         $query = "INSERT INTO {$this->getLibName()} ({$strFields}) VALUES ({$strValues})";
+        Log::debug('sql:' . $query);
         $result = $db->query($query);
         if (!empty($result['insert_id'])) {
             return $result['insert_id'];
@@ -244,6 +246,7 @@ abstract class Dao
         }
         $strUpdateFields = rtrim($strUpdateFields, ',');
         $query = "UPDATE {$this->getLibName()} SET {$strUpdateFields} WHERE {$where}";
+        Log::debug('sql:' . $query);
         $result = $db->query($query);
         return $result['affected_rows'];
     }
@@ -262,6 +265,7 @@ abstract class Dao
         $db = $this->getDb();
         $where = $db->escape($where);
         $query = "DELETE FROM {$this->getLibName()} WHERE {$where}";
+        Log::debug('sql:' . $query);
         $result = $db->query($query);
         return $result['affected_rows'];
     }

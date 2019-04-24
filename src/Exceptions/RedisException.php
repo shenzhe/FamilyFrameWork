@@ -45,6 +45,11 @@ class RedisException extends BaseException
         'msg' => 'redis连接池已空'
     ];
 
+    const AUTH_ERROR = [
+        'code' => -406,
+        'msg' => '鉴权失败: {msg}: {code}'
+    ];
+
 
     public function __construct(array $error = null, array $context = [])
     {

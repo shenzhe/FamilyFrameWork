@@ -33,13 +33,34 @@ class Redis
         $res = $redis->connect($config['host'], $config['port']);
         if ($res === false) {
             //连接失败，抛弃常
-            throw new RedisException(RedisException::CONNECT_ERROR, [
+            throw new RedisException(
+                RedisException::CONNECT_ERROR,
+                [
                     'msg' => $redis->errMsg,
-                    'code' => $redis->errCode]
+                    'code' => $redis->errCode
+                ]
             );
         } else {
+            if (empty($config['password'])) {
+                $res = $redis->auth($config['password']);
+                if (false === $res) { //鉴权失败
+                    throw new RedisException(
+                        RedisException::AUTH_ERROR,
+                        [
+                            'msg' => $redis->errMsg,
+                            'code' => $redis->errCode
+                        ]
+                    );
+                }
+            }
             $this->redis = $redis;
-            $this->redis->setOptions($config['options']);
+            if (!empty($config['options'])) {
+                $this->redis->setOptions($config['options']);
+            }
+
+            if (!empty($config['db'])) {
+                $this->select($config['db']);
+            }
         }
 
 
@@ -81,9 +102,12 @@ class Redis
             }
 
             if (!empty($this->redis->errCode)) {  //有错误码，则抛出弃常
-                throw new RedisException(RedisException::QUERY_ERROR, [
+                throw new RedisException(
+                    RedisException::QUERY_ERROR,
+                    [
                         'msg' => $this->redis->errMsg,
-                        'code' => $this->redis->errCode]
+                        'code' => $this->redis->errCode
+                    ]
                 );
             }
         }
@@ -107,5 +131,4 @@ class Redis
     {
         return $this->config;
     }
-
 }
