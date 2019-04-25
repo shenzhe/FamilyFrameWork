@@ -34,10 +34,10 @@ class Mysql implements PoolInterface
      * @desc 初始化连接池实例
      * @throws \Exception
      */
-    public static function init()
+    public static function init($throw = false)
     {
         $config = Config::get('mysql');
-        if (empty($config)) {
+        if (empty($config) && $throw) {
             throw new MysqlException(MysqlException::CONFIG_EMPTY);
         }
 

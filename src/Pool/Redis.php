@@ -32,10 +32,10 @@ class Redis implements PoolInterface
      * @desc 初始化连接池实例
      * @throws \Exception
      */
-    public static function init()
+    public static function init($throw = false)
     {
         $config = Config::get('redis');
-        if (empty($config)) {
+        if (empty($config) && $throw) {
             throw new RedisException(RedisException::CONFIG_EMPTY);
         }
 
