@@ -41,7 +41,7 @@ class Redis
                 ]
             );
         } else {
-            if (empty($config['password'])) {
+            if (!empty($config['password'])) {
                 $res = $redis->auth($config['password']);
                 if (false === $res) { //鉴权失败
                     throw new RedisException(
