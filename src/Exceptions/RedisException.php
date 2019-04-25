@@ -50,6 +50,11 @@ class RedisException extends BaseException
         'msg' => '鉴权失败: {msg}: {code}'
     ];
 
+    const QUERY_ERROR = [
+        'code' => -407,
+        'msg' => '{query}失败: {msg}: {code}'
+    ];
+
 
     public function __construct(array $error = null, array $context = [])
     {

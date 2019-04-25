@@ -105,6 +105,7 @@ class Redis
                 throw new RedisException(
                     RedisException::QUERY_ERROR,
                     [
+                        'query' => $name,
                         'msg' => $this->redis->errMsg,
                         'code' => $this->redis->errCode
                     ]
