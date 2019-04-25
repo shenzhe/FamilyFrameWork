@@ -13,7 +13,7 @@ class Ws
     {
         Swoole\Runtime::enableCoroutine();
 
-        $http = new Swoole\WebSocket\Server(Config::get('host'), Config::get('port'));
+        $http = new \swoole_websocket_server(Config::get('host'), Config::get('port'));
         $http->set(Config::get('swoole_setting'));
         $http->on('start', function (\swoole_server $serv) {
             //设置时区
@@ -74,14 +74,14 @@ class Ws
         });
 
         $http->on('open', function (
-            swoole_websocket_server $server,
-            swoole_http_request $request
+            \swoole_websocket_server $server,
+            \swoole_http_request $request
         ) {
             WsHandler::onOpen($server, $request);
         });
 
         $http->on('close', function (
-            swoole_websocket_server $server,
+            \swoole_websocket_server $server,
             int $fd,
             int $reactorId
         ) {
@@ -96,7 +96,7 @@ class Ws
         });
 
         $http->on('finish', function (
-            swoole_server $server,
+            $server,
             int $task_id,
             string $data
         ) {

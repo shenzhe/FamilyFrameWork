@@ -4,7 +4,7 @@ namespace Family\Pool;
 
 use Family\Cache\Redis as Cache;
 use chan;
-use Family\Core\Singleton;
+use Family\Core\Config;
 use Family\Exceptions\RedisException;
 
 class Redis implements PoolInterface

@@ -89,16 +89,9 @@ abstract class Dao
     public function recycle()
     {
         $coId = Coroutine::getId();
-        if (!empty($this->dbs[$coId])) {
-            if ($this->dbTag) {
-                $mysql = $this->dbs[$coId][$this->dbTag];
-                MysqlPool::getInstance($mysql->getConfig())->put($mysql);
-                unset($this->dbs[$coId][$this->dbTag]);
-            } else {
-                $mysql = $this->dbs[$coId];
-                MysqlPool::getInstance($mysql->getConfig())->put($mysql);
-                unset($this->dbs[$coId]);
-            }
+        if (!empty($this->dbs[$coId][$this->dbTag])) {
+            MysqlPool::getInstance($this->dbTag)->put($this->dbs[$coId][$this->dbTag]);
+            unset($this->dbs[$coId][$this->dbTag]);
         }
     }
 

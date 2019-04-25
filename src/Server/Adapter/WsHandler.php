@@ -14,7 +14,6 @@ use Family\Family;
 use Family\Pool;
 
 use Family\Helper;
-use Swoole\Server\Task;
 
 class WsHandler
 {
@@ -228,8 +227,8 @@ class WsHandler
 
 
     public static function onOpen(
-        swoole_websocket_server $server,
-        swoole_http_request $request
+        \swoole_websocket_server $server,
+        \swoole_http_request $request
     ) {
         if (self::$eventHandler) {
             if (method_exists(self::$eventHandler, 'open')) {
@@ -239,7 +238,7 @@ class WsHandler
     }
 
     public static function onClose(
-        swoole_websocket_server $server,
+        \swoole_websocket_server $server,
         int $fd,
         int $reactorId
     ) {
@@ -252,7 +251,7 @@ class WsHandler
 
     public static function onTask(
         \swoole_websocket_server $server,
-        Task $task
+        \swoole_server_task $task
     ) {
         go(function () use ($server, $task) {
             //初始化根协程ID

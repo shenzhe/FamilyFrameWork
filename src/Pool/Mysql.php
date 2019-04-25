@@ -6,6 +6,7 @@ use Family\Db\Mysql as DB;
 use chan;
 use Family\Exceptions\MysqlException;
 use Family\Core\Config;
+use Family\Core\Log;
 
 class Mysql implements PoolInterface
 {
@@ -78,10 +79,13 @@ class Mysql implements PoolInterface
      */
     public function put($mysql)
     {
-        if ($this->getLength() >= $this->config['pool_size']) {
+        $len = $this->getLength();
+
+        if ($len >= $this->config['pool_size']) {
             throw new MysqlException(MysqlException::POOL_FULL);
         }
         $this->pool->push($mysql);
+        Log::debug("mysql pool len:" . $this->getLength());
     }
 
     /**
@@ -91,10 +95,12 @@ class Mysql implements PoolInterface
      */
     public function get()
     {
+
         $mysql = $this->pool->pop($this->config['pool_get_timeout']);
         if (false === $mysql) {
             throw new MysqlException(MysqlException::POOL_EMPTY);
         }
+        Log::debug("mysql pool len:" . $this->getLength());
         return $mysql;
     }
 
