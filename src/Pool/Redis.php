@@ -12,7 +12,28 @@ class Redis implements PoolInterface
     private $pool;  //连接池容器，一个channel
     private $config;
 
-    use Singleton;
+    /**
+     * @return Redis
+     */
+    public static function getInstance($config = null)
+    {
+        if (empty($config)) {
+            if (!empty(self::$instances)) {
+                //如果没有配置config, 默认返回第一个连接池
+                return current(self::$instances);
+            }
+            throw new RedisException(RedisException::CONFIG_EMPTY);
+        }
+
+        if (empty($config['name'])) {
+            $config['name'] = $config['host'] . ':' . $config['port'];
+        }
+
+        if (empty(self::$instances[$config['name']])) {
+            self::$instances[$config['name']] = new static($config);
+        }
+        return self::$instances[$config['name']];
+    }
 
     /**
      * Redis constructor.
