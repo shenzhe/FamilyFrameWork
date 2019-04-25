@@ -27,7 +27,7 @@ class File extends Base
     public function log($level, $message, array $context = null, $original = 0)
     {
         $logLevel = $this->_config['level'] ?? Level::ALL;
-        if (isset(Level::$levels[$level]) && Level::$levels[$level] >= $logLevel) {
+        if (isset(Level::$levels[$level]) && Level::$levels[$level] > $logLevel) {
             return true;
         }
 
