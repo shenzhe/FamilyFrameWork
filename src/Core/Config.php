@@ -69,7 +69,7 @@ class Config
      * @param $key
      * @param $def
      * @desc 读取配置
-     * @return string|null
+     * @return string|null|array|object
      *
      */
     public static function get($key, $def = null)

@@ -13,26 +13,35 @@ class Redis implements PoolInterface
     private $config;
 
     /**
-     * @return Redis
+     * @param null $config
+     * @return Mysql
+     * @desc 获取连接池实例
+     * @throws \Exception
      */
-    public static function getInstance($config = null)
+    public static function getInstance($tag)
     {
+        if (empty(self::$instances[$tag])) {
+            self::$instances[$tag] = new static(Config::getField('redis', $tag));
+        }
+        return self::$instances[$tag];
+    }
+
+    /**
+     * @param null
+     * @return null
+     * @desc 初始化连接池实例
+     * @throws \Exception
+     */
+    public static function init()
+    {
+        $config = Config::get('redis');
         if (empty($config)) {
-            if (!empty(self::$instances)) {
-                //如果没有配置config, 默认返回第一个连接池
-                return current(self::$instances);
-            }
             throw new RedisException(RedisException::CONFIG_EMPTY);
         }
 
-        if (empty($config['name'])) {
-            $config['name'] = $config['host'] . ':' . $config['port'];
+        foreach ($config as $tag => $conf) {
+            self::$instances[$tag] = new static($conf);
         }
-
-        if (empty(self::$instances[$config['name']])) {
-            self::$instances[$config['name']] = new static($config);
-        }
-        return self::$instances[$config['name']];
     }
 
     /**

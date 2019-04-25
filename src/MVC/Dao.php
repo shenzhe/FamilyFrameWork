@@ -47,6 +47,10 @@ abstract class Dao
         $entityRef = new \ReflectionClass($this->entity);
         $this->table = $entityRef->getConstant('TABLE_NAME');
         $this->pkId = $entityRef->getConstant('PK_ID');
+        if (empty($dbTag)) {
+            //默认取第一个配置
+            $dbTag = \key(Config::get('mysql'));
+        }
         $this->dbTag = $dbTag;
     }
 
@@ -66,21 +70,16 @@ abstract class Dao
     public function getDb()
     {
         $coId = Coroutine::getId();
-        if (empty($this->dbs[$coId])) {
+        if (empty($this->dbs[$coId][$this->dbTag])) {
             //不同协程不能复用mysql连接，所以通过协程id进行资源隔离
             //达到同一协程只用一个mysql连接，不同协程用不同的mysql连接
-            if ($this->dbTag) {
-                $mysqlConfig = Config::get($this->dbTag);
-            } else {
-                $mysqlConfig = null;
-            }
-            $this->dbs[$coId] = MysqlPool::getInstance($mysqlConfig)->get();
+            $this->dbs[$coId][$this->dbTag] = MysqlPool::getInstance($this->dbTag)->get();
             defer(function () {
                 //利用协程的defer特性，自动回收资源
                 $this->recycle();
             });
         }
-        return $this->dbs[$coId];
+        return $this->dbs[$coId][$this->dbTag];
     }
 
     /**
@@ -91,9 +90,15 @@ abstract class Dao
     {
         $coId = Coroutine::getId();
         if (!empty($this->dbs[$coId])) {
-            $mysql = $this->dbs[$coId];
-            MysqlPool::getInstance($mysql->getConfig())->put($mysql);
-            unset($this->dbs[$coId]);
+            if ($this->dbTag) {
+                $mysql = $this->dbs[$coId][$this->dbTag];
+                MysqlPool::getInstance($mysql->getConfig())->put($mysql);
+                unset($this->dbs[$coId][$this->dbTag]);
+            } else {
+                $mysql = $this->dbs[$coId];
+                MysqlPool::getInstance($mysql->getConfig())->put($mysql);
+                unset($this->dbs[$coId]);
+            }
         }
     }
 
@@ -191,7 +196,7 @@ abstract class Dao
         if ($limit) {
             $query .= " limit {$limit}";
         }
-        Log::debug('sql:'.$query);
+        Log::debug('sql:' . $query);
         return $db->query($query);
     }
 

@@ -5,6 +5,7 @@ namespace Family\Pool;
 use Family\Db\Mysql as DB;
 use chan;
 use Family\Exceptions\MysqlException;
+use Family\Core\Config;
 
 class Mysql implements PoolInterface
 {
@@ -12,31 +13,37 @@ class Mysql implements PoolInterface
     private $pool;  //连接池容器，一个channel
     private $config;
 
+
     /**
      * @param null $config
      * @return Mysql
      * @desc 获取连接池实例
      * @throws \Exception
      */
-    public static function getInstance($config = null)
+    public static function getInstance($tag)
     {
+        if (empty(self::$instances[$tag])) {
+            self::$instances[$tag] = new static(Config::getField('mysql', $tag));
+        }
+        return self::$instances[$tag];
+    }
 
+    /**
+     * @param null
+     * @return null
+     * @desc 初始化连接池实例
+     * @throws \Exception
+     */
+    public static function init()
+    {
+        $config = Config::get('mysql');
         if (empty($config)) {
-            if (!empty(self::$instances)) {
-                //如果没有配置config, 默认返回第一个连接池
-                return current(self::$instances);
-            }
             throw new MysqlException(MysqlException::CONFIG_EMPTY);
         }
 
-        if (empty($config['name'])) {
-            $config['name'] = $config['master']['host'] . ':' . $config['master']['port'];
+        foreach ($config as $tag => $conf) {
+            self::$instances[$tag] = new static($conf);
         }
-
-        if (empty(self::$instances[$config['name']])) {
-            self::$instances[$config['name']] = new static($config);
-        }
-        return self::$instances[$config['name']];
     }
 
     /**
