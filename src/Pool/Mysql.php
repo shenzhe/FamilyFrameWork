@@ -38,8 +38,11 @@ class Mysql implements PoolInterface
     public static function init($throw = false)
     {
         $config = Config::get('mysql');
-        if (empty($config) && $throw) {
-            throw new MysqlException(MysqlException::CONFIG_EMPTY);
+        if (empty($config)) {
+            if ($throw) {
+                throw new MysqlException(MysqlException::CONFIG_EMPTY);
+            }
+            return false;
         }
 
         foreach ($config as $tag => $conf) {

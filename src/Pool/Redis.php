@@ -12,6 +12,8 @@ class Redis implements PoolInterface
     private $pool;  //连接池容器，一个channel
     private $config;
 
+    private static $instances;
+
     /**
      * @param null $config
      * @return Mysql
@@ -35,8 +37,12 @@ class Redis implements PoolInterface
     public static function init($throw = false)
     {
         $config = Config::get('redis');
-        if (empty($config) && $throw) {
-            throw new RedisException(RedisException::CONFIG_EMPTY);
+        if (empty($config)) {
+            if ($throw) {
+                throw new RedisException(RedisException::CONFIG_EMPTY);
+            } else {
+                return false;
+            }
         }
 
         foreach ($config as $tag => $conf) {
