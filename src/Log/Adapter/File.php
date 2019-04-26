@@ -33,7 +33,7 @@ class File extends Base
 
         if (!empty($context)) {
             foreach ($context as $key => $val) {
-                $message = str_replace('{' . $key . '}', $val, $message);
+                $message = str_replace($key, $val, $message);
             }
         }
 

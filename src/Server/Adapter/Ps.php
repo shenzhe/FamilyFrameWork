@@ -17,12 +17,6 @@ class Ps
 
     public function __construct()
     {
-        if (!class_exists('ProcessEvent')) {
-            Log::error('ProcessEvent class no exits');
-            echo 'ProcessEvent class no exits';
-            return '';
-        }
-
         $daemonize = Config::getField('process', 'daemonize', 0);
         if ($daemonize) {
             //守护进程化
@@ -48,14 +42,22 @@ class Ps
 
         $pool = new Swoole\Process\Pool($workerNum, $ipcType, $queueKey);
         $pool->on('WorkerStart', function ($pool, $workerId) {
+            if (!class_exists('ProcessEvent')) {
+                Log::error('ProcessEvent class no exits');
+                echo 'ProcessEvent class no exits';
+                $pool->shudown();
+                return '';
+            }
             if ('Darwin' !== PHP_OS) {
-                $title = sprintf("worker process, id:%d, running:%s",
+                $title = sprintf(
+                    "worker process, id:%d, running:%s",
                     $workerId,
                     date("Y-m-d H:i:s")
                 );
                 swoole_set_process_name($title);
             }
             Swoole\Process::signal(SIGTERM, function () {
+                Log::info('signal:' . SIGTERM);
                 self::$running = 0;
             });
             Coroutine::create(function () use ($pool, $workerId) {
@@ -95,7 +97,8 @@ class Ps
         }
 
         if ('Darwin' !== PHP_OS) {
-            $title = sprintf("master process, running:%s",
+            $title = sprintf(
+                "master process, running:%s",
                 date("Y-m-d H:i:s")
             );
             swoole_set_process_name($title);
