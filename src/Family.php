@@ -29,7 +29,7 @@ class Family
         self::$rootPath = $rootPath;
     }
 
-    final public static function run()
+    final public static function run($configDir='')
     {
         try {
             if (!defined('DS')) {
@@ -43,7 +43,6 @@ class Family
             //先注册自动加载
             \spl_autoload_register(__CLASS__ . '::autoLoader');
             //加载配置
-            $configDir = '';
             $options = getopt("c::");
             if (!empty($options['c'])) {
                 $configDir = $options['c'];
