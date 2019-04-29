@@ -17,9 +17,15 @@ class Protocol
         $request = new \swoole_http_request();
         $request->fd = $frame->fd;
         $request->server['http_method'] = 'POST';
-        $data = json_decode($frame->data);
-        $request->server['path_info'] = $data[0];
-        $request->post = $data[1];
+        $fun = Config::get('frame_parse_fun');
+        if (!empty($fun)) {
+            $ret = \call_user_func($fun, $frame->data);
+            $request->server['path_info'] = $ret[0];
+            $request->post = $ret[1];
+        } else {
+            $request->server['path_info'] = '/';
+            $request->post = $frame->data;
+        }
         return $request;
     }
 
