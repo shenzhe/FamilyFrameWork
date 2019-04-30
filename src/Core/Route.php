@@ -35,7 +35,10 @@ class Route
             if (isset($sr[$path])) { //找到方法
                 if (in_array($httpMethod, $sr[$path][0])) {
                     if (is_callable($sr[$path][1])) {
-                        return $sr[$path][1]($request, $context->getResponse(), ...$$sr[$path][2]);
+                        if (empty($sr[$path][2])) {
+                            return $sr[$path][1]($request, $context->getResponse());
+                        }
+                        return $sr[$path][1]($request, $context->getResponse(), ...$sr[$path][2]);
                     }
                     return self::_go($request, $sr[$path][1], $sr[$path][2]);
                 }

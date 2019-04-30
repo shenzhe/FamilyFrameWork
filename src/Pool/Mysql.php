@@ -72,6 +72,10 @@ class Mysql implements PoolInterface
                     $this->put($mysql);
                 }
             }
+            $time = $config['ping_timer'] ?? 3600000;
+            swoole_timer_tick($time, function () {
+                $this->ping();
+            });
         }
     }
 
@@ -133,5 +137,48 @@ class Mysql implements PoolInterface
             }
         }
         return $this->pool->close();
+    }
+
+    /**
+     * 定时ping，可做断线重连
+     */
+    public function ping()
+    {
+        $len = $this->getLength();
+        for ($i = 0; $i < $len; $i++) {
+            try {
+                $db = $this->get();
+                $db->ping();
+                $this->put($db);
+            } catch (MysqlException $e) {
+                continue;
+            }
+        }
+    }
+
+    public function getInfo()
+    {
+        $ret = [
+            'master' => [
+                spl_object_hash($this->master),
+                $this->master->sock,
+                $this->master->connected,
+                $this->master->connect_error,
+                $this->master->connect_errno,
+            ],
+        ];
+        if (!empty($this->slave)) {
+            foreach ($this->slave as $slave) {
+                $ret['slave'][] = [
+                    spl_object_hash($slave),
+                    $slave->sock,
+                    $slave->connected,
+                    $slave->connect_error,
+                    $slave->connect_errno,
+                ];
+            }
+        }
+
+        return $ret;
     }
 }

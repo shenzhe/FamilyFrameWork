@@ -28,9 +28,12 @@ class Mysql
         $res = $master->connect($config['master']);
         if ($res === false) {
             //连接失败，抛弃常
-            throw new MysqlException(MysqlException::CONNECT_ERROR, [
+            throw new MysqlException(
+                MysqlException::CONNECT_ERROR,
+                [
                     'msg' => $master->connect_error,
-                    'code' => $master->errno]
+                    'code' => $master->errno
+                ]
             );
         } else {
             //存入master资源
@@ -44,9 +47,12 @@ class Mysql
                 $res = $slave->connect($conf);
                 if ($res === false) {
                     //连接失败，抛弃常
-                    throw new MysqlException(MysqlException::CONNECT_ERROR, [
+                    throw new MysqlException(
+                        MysqlException::CONNECT_ERROR,
+                        [
                             'msg' => $slave->connect_error,
-                            'code' => $slave->errno]
+                            'code' => $slave->errno
+                        ]
                     );
                 } else {
                     //存入slave资源
@@ -56,6 +62,7 @@ class Mysql
         }
 
         $this->config = $config;
+        $this->lastTime = time();
         return $res;
     }
 
@@ -75,9 +82,12 @@ class Mysql
             $res = $master->connect($this->config['master']);
             if ($res === false) {
                 //连接失败，抛弃常
-                throw new MysqlException(MysqlException::CONNECT_ERROR, [
+                throw new MysqlException(
+                    MysqlException::CONNECT_ERROR,
+                    [
                         'msg' => $master->connect_error,
-                        'code' => $master->errno]
+                        'code' => $master->errno
+                    ]
                 );
             } else {
                 //更新主库连接
@@ -92,9 +102,12 @@ class Mysql
             $res = $slave->connect($this->config['slave'][$index]);
             if ($res === false) {
                 //连接失败，抛弃常
-                throw new MysqlException(MysqlException::CONNECT_ERROR, [
+                throw new MysqlException(
+                    MysqlException::CONNECT_ERROR,
+                    [
                         'msg' => $slave->connect_error,
-                        'code' => $slave->errno]
+                        'code' => $slave->errno
+                    ]
                 );
             } else {
                 //更新对应的重库连接
@@ -128,9 +141,12 @@ class Mysql
             }
 
             if (!empty($db->errno)) {  //有错误码，则抛出弃常
-                throw new MysqlException(MysqlException::QUERY_ERROR, [
+                throw new MysqlException(
+                    MysqlException::QUERY_ERROR,
+                    [
                         'msg' => $db->error,
-                        'code' => $db->errno]
+                        'code' => $db->errno
+                    ]
                 );
             }
         }
@@ -149,7 +165,7 @@ class Mysql
         $sql = $arguments[0];
         $res = $this->chooseDb($sql);
         $db = $res['db'];
-//        $result = call_user_func_array([$db, $name], $arguments);
+        //        $result = call_user_func_array([$db, $name], $arguments);
         $time = microtime(true);
         $result = $db->$name($sql);
         Log::debug($sql . ':' . (microtime(true) - $time));
@@ -164,9 +180,12 @@ class Mysql
             }
 
             if (!empty($db->errno)) {  //有错误码，则抛出弃常
-                throw new MysqlException(MysqlException::QUERY_ERROR, [
+                throw new MysqlException(
+                    MysqlException::QUERY_ERROR,
+                    [
                         'msg' => $db->error,
-                        'code' => $db->errno]
+                        'code' => $db->errno
+                    ]
                 );
             }
         }
@@ -245,4 +264,30 @@ class Mysql
         return $this->config;
     }
 
+    public function ping()
+    {
+        try {
+            if (!$this->master->connected) {
+                $this->reconnect('master', 0);
+            } else {
+                $this->master->query("select 1");
+            }
+        } catch (MysqlException $e) {
+            Log::exception($e);
+        }
+
+        if (!empty($this->slave)) {
+            foreach ($this->slave as $idx => $slave) {
+                try {
+                    if (!$slave->connected) {
+                        $this->reconnect('slave', $idx);
+                    } else {
+                        $slave->query("select 1");
+                    }
+                } catch (MysqlException $e) {
+                    Log::exception($e);
+                }
+            }
+        }
+    }
 }
