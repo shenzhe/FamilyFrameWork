@@ -244,7 +244,7 @@ class WsHandler
     ) {
         if (self::$eventHandler) {
             if (method_exists(self::$eventHandler, 'close')) {
-                self::$eventHandler->open($server, $fd, $reactorId);
+                self::$eventHandler->close($server, $fd, $reactorId);
             }
         }
     }
