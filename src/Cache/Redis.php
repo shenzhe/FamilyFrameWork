@@ -29,6 +29,8 @@ class Redis
             throw new RedisException(RedisException::CONFIG_EMPTY);
         }
 
+        $this->config = $config;
+
         $redis = new coRedis();
         $res = $redis->connect($config['host'], $config['port']);
         if ($res === false) {
@@ -53,19 +55,25 @@ class Redis
                     );
                 }
             }
-            $this->redis = $redis;
+
             if (!empty($config['options'])) {
-                $this->redis->setOptions($config['options']);
+                $redis->setOptions($config['options']);
             }
 
             if (!empty($config['db'])) {
-                $this->select($config['db']);
+                $res = $redis->select($config['db']);
+                if (false === $res) { //鉴权失败
+                    throw new RedisException(
+                        RedisException::AUTH_ERROR,
+                        [
+                            'db' => $config['db']
+                        ]
+                    );
+                }
             }
+
+            $this->redis = $redis;
         }
-
-
-        $this->config = $config;
-
         return $res;
     }
 

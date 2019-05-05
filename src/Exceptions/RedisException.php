@@ -55,6 +55,11 @@ class RedisException extends BaseException
         'msg' => '{query}失败: {msg}: {code}'
     ];
 
+    const SELECT_ERROR = [
+        'code' => -407,
+        'msg' => 'select {db}失败'
+    ];
+
 
     public function __construct(array $error = null, array $context = [])
     {
