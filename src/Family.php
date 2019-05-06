@@ -29,7 +29,7 @@ class Family
         self::$rootPath = $rootPath;
     }
 
-    final public static function run($configDir='')
+    final public static function run($configDir = '')
     {
         try {
             if (!defined('DS')) {
@@ -43,9 +43,12 @@ class Family
             //先注册自动加载
             \spl_autoload_register(__CLASS__ . '::autoLoader');
             //加载配置
-            $options = getopt("c::");
-            if (!empty($options['c'])) {
-                $configDir = $options['c'];
+            $configDir = getenv('NAME_SPACE');
+            if (empty($configDir)) {
+                $options = getopt("c::");
+                if (!empty($options['c'])) {
+                    $configDir = $options['c'];
+                }
             }
             Config::load($configDir);
             $timeZone = Config::get('time_zone', 'Asia/Shanghai');
@@ -55,11 +58,11 @@ class Family
             (new Server())->start();
         } catch (\Exception $e) {
             Log::exception($e);
-//            echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL;
+            //            echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL;
             print_r($e);
         } catch (\Throwable $throwable) {
             Log::exception($throwable);
-//            echo $throwable->getCode() . ':' . $throwable->getMessage() . PHP_EOL;
+            //            echo $throwable->getCode() . ':' . $throwable->getMessage() . PHP_EOL;
             print_r($throwable);
         }
     }
