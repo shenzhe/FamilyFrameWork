@@ -66,7 +66,9 @@ class Redis
                     throw new RedisException(
                         RedisException::AUTH_ERROR,
                         [
-                            'db' => $config['db']
+                            'db' => $config['db'],
+                            'msg' => $redis->errMsg,
+                            'code' => $redis->errCode
                         ]
                     );
                 }

@@ -57,7 +57,7 @@ class RedisException extends BaseException
 
     const SELECT_ERROR = [
         'code' => -407,
-        'msg' => 'select {db}失败'
+        'msg' => 'select {db}失败, {code}: {msg}'
     ];
 
 
