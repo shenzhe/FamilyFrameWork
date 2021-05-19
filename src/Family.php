@@ -1,4 +1,5 @@
 <?php
+
 namespace Family;
 
 use Family\Core\Config;
@@ -44,12 +45,11 @@ class Family
             \spl_autoload_register(__CLASS__ . '::autoLoader');
             //加载配置
             if (empty($configDir)) {
-                $configDir = getenv('NAME_SPACE');
-                if (empty($configDir)) {
-                    $options = getopt("c::");
-                    if (!empty($options['c'])) {
-                        $configDir = $options['c'];
-                    }
+                $options = getopt("c::");
+                if (!empty($options['c'])) {
+                    $configDir = $options['c'];
+                } else {
+                    $configDir = getenv('NAME_SPACE');
                 }
             }
             Config::load($configDir);
