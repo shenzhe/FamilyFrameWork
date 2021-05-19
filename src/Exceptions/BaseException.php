@@ -2,10 +2,9 @@
 
 namespace Family\Exceptions;
 
-
-use common\Display;
 use Family\Core\Config;
 use Family\Core\Log;
+use Family\Helper\Formater;
 
 /**
  * 异常处理
@@ -29,18 +28,15 @@ class BaseException extends \Exception
     public static function exceptionHandler(\Throwable $exception)
     {
         $class = get_class($exception);
-        if (__CLASS__ == $class &&
-            method_exists($exception, 'exceptionHandler')) {
+        if (
+            __CLASS__ == $class &&
+            method_exists($exception, 'exceptionHandler')
+        ) {
             return call_user_func([$exception, 'exceptionHandler'], $exception);
         } else {
-            Log::exception($exception);
-            return self::display(array(
-                'className' => get_class($exception),
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode() ?: -1,
-                'file' => $exception->getFile(),
-                'line' => $exception->getLine()
-            ));
+            $errInfo = Formater::exception($exception);
+            Log::emergency(\var_export($errInfo, true));
+            return self::display($errInfo);
         }
     }
 
@@ -52,39 +48,9 @@ class BaseException extends \Exception
     public static function fatalHandler()
     {
         $error = \error_get_last();
-        if (empty($error)) {
-            return array(
-                'className' => '',
-                'message' => '',
-                'code' => 0,
-                'file' => '',
-                'line' => '',
-                'trace' => array(),
-            );
-        }
-
-
-        Log::alert([\var_export($error, true)]);
-
-        if (!in_array($error['type'], array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR))) {
-            return array(
-                'className' => 'fatal',
-                'message' => '[type:' . $error['type'] . '] ' . $error['message'],
-                'code' => -1,
-                'file' => $error['file'],
-                'line' => $error['line'],
-                'trace' => array(),
-            );
-        }
-
-        return self::display(array(
-            'className' => 'fatal',
-            'message' => '[type:' . $error['type'] . '] ' . $error['message'],
-            'code' => -1,
-            'file' => $error['file'],
-            'line' => $error['line'],
-            'trace' => array(),
-        ));
+        $errInfo = Formater::fatal($error);
+        Log::emergency(\var_export($errInfo, true));
+        return self::display($errInfo);
     }
 
 
@@ -99,15 +65,20 @@ class BaseException extends \Exception
      */
     public static function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
     {
+        if (E_NOTICE === $errno) {
+            return;
+        }
         $error = [
             'code' => $errno,
             'message' => $errstr,
             'file' => $errfile,
             'line' => $errline,
             'errcontext' => $errcontext,
+            'type' => 'err:' . $errno
         ];
-        Log::error([\var_export($error, true)]);
-        return self::display($error);
+        $errInfo = Formater::fatal($error, true, 'error_handler');
+        Log::error(\var_export($errInfo, true));
+        return;
     }
 
     public static function display($error)
@@ -141,5 +112,4 @@ class BaseException extends \Exception
 
         return $msg;
     }
-
 }

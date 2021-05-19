@@ -1,11 +1,10 @@
 <?php
-//file Family/Coroutine/Context.php
-
 namespace Family\Coroutine;
 
 
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
+use Swoole;
 
 class Context
 {
@@ -23,13 +22,13 @@ class Context
      */
     private $map = [];
 
-    public function __construct(\swoole_http_request $request = null, \swoole_http_response $response = null)
+    public function __construct(Swoole\Http\Request $request = null, Swoole\Http\Response $response = null)
     {
         if ($request) {
-            $this->request = new Request($request);
+            $this->request = $request;
         }
         if ($response) {
-            $this->response = new Response($response);
+            $this->response = $response;
         }
     }
 

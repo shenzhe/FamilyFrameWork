@@ -1,7 +1,5 @@
 <?php
-//file: framework/family/Core/Log.php
 namespace Family\Core;
-
 
 use Family\Log\Factory;
 

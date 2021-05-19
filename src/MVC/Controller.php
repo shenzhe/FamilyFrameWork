@@ -1,17 +1,14 @@
 <?php
-//file framework/Family/MVC/Controller.php
+
 namespace Family\MVC;
 
-
-use Family\Core\Config;
-use Family\Helper\Template;
-use Family\Pool\Context;
+use Swoole;
 
 abstract class Controller
 {
 
     /**
-     * @var \EasySwoole\Http\Request
+     * @var Swoole\Http\Request
      */
     protected $request;
     protected $template;
@@ -21,12 +18,11 @@ abstract class Controller
 
     public function __construct()
     {
-        //通过context拿到$request, 再也不用担收数据错乱了
-        /**
-         * @var $context \Family\Coroutine\Context
-         */
-        $context = Context::getInstance()->get();
-        $this->request = $context->getRequest();
+        $this->request = Swoole\Coroutine::getContext()->request;
     }
 
+    public function _before()
+    { }
+    public function _after()
+    { }
 }

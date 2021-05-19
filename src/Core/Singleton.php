@@ -1,7 +1,5 @@
 <?php
-//file frame/Family/Core/Singleton.php
 namespace Family\Core;
-
 
 use Family\Coroutine\Coroutine;
 use Family\MVC\Controller;

@@ -1,10 +1,5 @@
 <?php
-
 namespace Family\Exceptions;
-
-
-use Family\Core\Log;
-use Family\Core\Singleton;
 
 /**
  * 异常处理

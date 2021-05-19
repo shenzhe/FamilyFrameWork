@@ -1,8 +1,5 @@
 <?php
-
-
 namespace Family\Server\Adapter;
-
 
 use Family\Core\Config;
 use Family\Core\Log;

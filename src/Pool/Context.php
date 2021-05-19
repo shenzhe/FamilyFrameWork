@@ -1,5 +1,4 @@
 <?php
-//file Family/Pool/Context.php
 namespace Family\Pool;
 
 use Family\Core\Singleton;

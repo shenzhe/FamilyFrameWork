@@ -1,8 +1,5 @@
 <?php
-
-
 namespace Family\Db;
-
 
 use Family\Core\Config;
 

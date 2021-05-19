@@ -1,12 +1,11 @@
 <?php
-//file framework/Family/Pool/Mysql.php
 namespace Family\Pool;
 
 use Family\Db\Mysql as DB;
 use chan;
 use Family\Exceptions\MysqlException;
 use Family\Core\Config;
-use Family\Core\Log;
+use Swoole;
 
 class Mysql implements PoolInterface
 {
@@ -73,7 +72,7 @@ class Mysql implements PoolInterface
                 }
             }
             $time = $config['ping_timer'] ?? 3600000;
-            swoole_timer_tick($time, function () {
+            Swoole\Timer::tick($time, function () {
                 $this->ping();
             });
         }
@@ -92,7 +91,7 @@ class Mysql implements PoolInterface
             throw new MysqlException(MysqlException::POOL_FULL);
         }
         $this->pool->push($mysql);
-        Log::debug("mysql pool len:" . $this->getLength());
+        // Log::debug("mysql pool len:" . $this->getLength());
     }
 
     /**
@@ -107,7 +106,7 @@ class Mysql implements PoolInterface
         if (false === $mysql) {
             throw new MysqlException(MysqlException::POOL_EMPTY);
         }
-        Log::debug("mysql pool len:" . $this->getLength());
+        // Log::debug("mysql pool len:" . $this->getLength());
         return $mysql;
     }
 

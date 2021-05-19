@@ -1,7 +1,9 @@
 <?php
 namespace Family\Log;
 
-abstract class Base
+use Psr\Log\LoggerInterface;
+
+abstract class Base implements LoggerInterface
 {
     /**
      * @param $message

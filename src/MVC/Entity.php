@@ -1,9 +1,7 @@
 <?php
-//file framework/Family/MVC/Entity.php
 namespace Family\MVC;
 
 use ValidateInput\ValidateInput;
-use Family\Core\Log;
 
 abstract class Entity
 {
@@ -24,8 +22,8 @@ abstract class Entity
             }
         }
         $validate = $this->getValidate();
-        Log::debug("validate:" . json_encode($validate));
-        Log::debug("data:" . json_encode($array));
+        // Log::debug("validate:" . json_encode($validate));
+        // Log::debug("data:" . json_encode($array));
         if (!empty($validate)) {
             foreach ($validate as $key => $value) {
                 $this->$key = ValidateInput::vaild($this->$key, $value[0], $value[1]);

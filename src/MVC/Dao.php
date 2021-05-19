@@ -1,6 +1,4 @@
 <?php
-//file framework/Family/MVC/Dao.php
-
 namespace Family\MVC;
 
 use Family\Core\Config;
@@ -179,8 +177,12 @@ abstract class Dao
     public function fetchArray($where = '1', $fields = '*', $orderBy = null, $limit = 0)
     {
         $db = $this->getDb();
-        $where = $db->escape($where);
-        $query = "SELECT {$fields} FROM {$this->getLibName()} WHERE {$where}";
+        if (is_array($where)) {
+            $query = "SELECT {$fields} FROM {$this->getLibName()} WHERE {$where['where']}";
+        } else {
+            $query = "SELECT {$fields} FROM {$this->getLibName()} WHERE {$where}";
+        }
+
 
         if ($orderBy) {
             $query .= " order by {$orderBy}";
@@ -190,7 +192,11 @@ abstract class Dao
             $query .= " limit {$limit}";
         }
         Log::debug('sql:' . $query);
-        return $db->query($query);
+        if (is_array($where)) {
+            return $db->query($query, $where['param']);
+        } else {
+            return $db->querySql($query);
+        }
     }
 
     /**
@@ -203,20 +209,11 @@ abstract class Dao
     {
 
         $db = $this->getDb();
-        $keys = [];
-        $values = [];
-        foreach ($array as $key => $value) {
-            if (is_null($value) || is_null($key)) {
-                continue;
-            }
-            $keys[] = $key;
-            $values[] = $db->escape($value);
-        }
-        $strFields = '`' . implode('`,`', $keys) . '`';
-        $strValues = "'" . implode("','", $values) . "'";
-        $query = "INSERT INTO {$this->getLibName()} ({$strFields}) VALUES ({$strValues})";
+        $fields =  '`' . implode('`,`', array_keys($array)) . '`';
+        $values = rtrim(str_repeat('?,', count($array)), ',');
+        $query = "INSERT INTO {$this->getLibName()} ({$fields}) VALUES ({$values})";
         Log::debug('sql:' . $query);
-        $result = $db->query($query);
+        $result = $db->exeucte($query, array_values($array));
         if (!empty($result['insert_id'])) {
             return $result['insert_id'];
         }
@@ -245,7 +242,7 @@ abstract class Dao
         $strUpdateFields = rtrim($strUpdateFields, ',');
         $query = "UPDATE {$this->getLibName()} SET {$strUpdateFields} WHERE {$where}";
         Log::debug('sql:' . $query);
-        $result = $db->query($query);
+        $result = $db->querySql($query);
         return $result['affected_rows'];
     }
 
@@ -261,10 +258,9 @@ abstract class Dao
             throw new MysqlException(MysqlException::DELETE_NO_WHERE);
         }
         $db = $this->getDb();
-        $where = $db->escape($where);
-        $query = "DELETE FROM {$this->getLibName()} WHERE {$where}";
+        $query = "DELETE FROM {$this->getLibName()} WHERE {$where['where']}";
         Log::debug('sql:' . $query);
-        $result = $db->query($query);
+        $result = $db->query($query, $where['param']);
         return $result['affected_rows'];
     }
 }

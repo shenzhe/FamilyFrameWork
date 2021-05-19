@@ -1,13 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: shenzhe
- * Date: 2018-12-30
- * Time: 10:43
- */
-
 namespace Family\Pool;
-
 
 interface PoolInterface
 {

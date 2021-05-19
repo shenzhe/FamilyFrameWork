@@ -1,11 +1,10 @@
 <?php
-
-
 namespace Family\Server\Adapter;
 
 use Family\Core\Config;
 use Family\Family;
 use Swoole;
+use Family\Core\Log;
 
 class Ws
 {
@@ -13,25 +12,20 @@ class Ws
     {
         Swoole\Runtime::enableCoroutine();
 
-        $http = new \swoole_websocket_server(Config::get('host'), Config::get('port'));
+        $http = new Swoole\WebSocket\Server(Config::get('host'), Config::get('port'));
         $http->set(Config::get('swoole_setting'));
-        $http->on('start', function (\swoole_server $serv) {
-            //设置时区
-            $timeZone = Config::get('time_zone');
-            if ($timeZone) {
-                \date_default_timezone_set($timeZone);
-            }
+        $http->on('start', function (Swoole\Server $serv) {
             //服务启动
             //日志初始化
             //            Log::init();
             file_put_contents(Family::$rootPath . DS . 'bin' . DS . 'master.pid', $serv->master_pid);
             file_put_contents(Family::$rootPath . DS . 'bin' . DS . 'manager.pid', $serv->manager_pid);
-            //            Log::info("http server starting! {host}: {port}, masterId:{masterId}, managerId: {managerId}", [
-            //                '{host}' => Config::get('host'),
-            //                '{port}' => Config::get('port'),
-            //                '{masterId}' => $serv->master_pid,
-            //                '{managerId}' => $serv->manager_pid,
-            //            ]);
+            Log::info("http server starting! {host}: {port}, masterId:{masterId}, managerId: {managerId}", [
+                '{host}' => Config::get('host'),
+                '{port}' => Config::get('port'),
+                '{masterId}' => $serv->master_pid,
+                '{managerId}' => $serv->manager_pid,
+            ]);
             echo "http server staring! ://" . Config::get('host') . ":" . Config::get('port');
             WsHandler::onStart($serv);
         });
@@ -40,7 +34,7 @@ class Ws
             //服务关闭，删除进程id
             unlink(Family::$rootPath . DS . 'bin' . DS . 'master.pid');
             unlink(Family::$rootPath . DS . 'bin' . DS . 'manager.pid');
-            //            Log::info("http server shutdown");
+            Log::info("http server shutdown");
             echo "http server shutdown";
             WsHandler::onShutDown($serv);
         });
@@ -49,39 +43,45 @@ class Ws
             WsHandler::onManagerStart($serv);
         });
 
-        $http->on('workerStop', function (\swoole_http_server $serv, int $worker_id) {
+        $http->on('workerStop', function (Swoole\WebSocket\Server $serv, int $worker_id) {
             WsHandler::onWorkerStop($serv, $worker_id);
         });
+        
 
-        $http->on('workerStart', function (\swoole_http_server $serv, int $worker_id) {
+        $http->on('workerStart', function (Swoole\WebSocket\Server $serv, int $worker_id) {
             WsHandler::onWorkerStart($serv, $worker_id);
         });
 
-        $http->on('WorkerError', function (\swoole_http_server $serv, int $worker_id, int $worker_pid, int $exit_code, int $signal) {
+        $http->on('WorkerError', function (Swoole\WebSocket\Server $serv, int $worker_id, int $worker_pid, int $exit_code, int $signal) {
             WsHandler::onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal);
         });
+
+        $http->on('workerExit', function (Swoole\WebSocket\Server $serv, int $worker_id) {
+            WsHandler::onWorkerExit($serv, $worker_id);
+        });
+
         $http->on('request', function (
-            \swoole_http_request $request,
-            \swoole_http_response $response
+            Swoole\Http\Request $request,
+            Swoole\Http\Response $response
         ) {
             WsHandler::onRequest($request, $response);
         });
         $http->on('message', function (
-            \swoole_websocket_server $server,
-            \swoole_websocket_frame $frame
+            Swoole\WebSocket\Server $server,
+            Swoole\WebSocket\Frame $frame
         ) {
             WsHandler::onMessage($server, $frame);
         });
 
         $http->on('open', function (
-            \swoole_websocket_server $server,
-            \swoole_http_request $request
+            Swoole\WebSocket\Server $server,
+            Swoole\Http\Request $request
         ) {
             WsHandler::onOpen($server, $request);
         });
 
         $http->on('close', function (
-            \swoole_websocket_server $server,
+            Swoole\WebSocket\Server $server,
             int $fd,
             int $reactorId
         ) {
@@ -89,8 +89,8 @@ class Ws
         });
 
         $http->on('task', function (
-            \swoole_websocket_server $server,
-            \swoole_server_task $task
+            Swoole\WebSocket\Server $server,
+            Swoole\Server\Task $task
         ) {
             WsHandler::onTask($server, $task);
         });
@@ -98,9 +98,17 @@ class Ws
         $http->on('finish', function (
             $server,
             int $task_id,
-            string $data
+            $data
         ) {
             WsHandler::onFinish($server, $task_id, $data);
+        });
+
+        $http->on('pipeMessage', function (
+            $server,
+            int $src_worker_id,
+            $data
+        ) {
+            WsHandler::onPipeMessage($server, $src_worker_id, $data);
         });
         $http->start();
     }

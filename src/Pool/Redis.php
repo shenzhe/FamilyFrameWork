@@ -1,5 +1,4 @@
 <?php
-//file framework/Family/Pool/Redis.php
 namespace Family\Pool;
 
 use Family\Cache\Redis as Cache;

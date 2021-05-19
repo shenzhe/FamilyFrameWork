@@ -1,8 +1,6 @@
 <?php
-//file framework/Family/Cache/Redis.php
 namespace Family\Cache;
 
-use Family\Core\Log;
 use Family\Exceptions\RedisException;
 use Swoole\Coroutine\Redis as coRedis;
 
@@ -100,15 +98,15 @@ class Redis
         if (in_array($name, $this->noSupport)) {
             throw new RedisException(RedisException::NO_SUPPORT_CMD, ['cmd' => $name]);
         }
-        $time = microtime(true);
+        // $time = microtime(true);
         $result = call_user_func_array([$this->redis, $name], $arguments);
-        Log::debug($name . ':' . (microtime(true) - $time));
+        // Log::debug($name . ':' . (microtime(true) - $time));
         if (false === $result) {
             if (!$this->redis->connected) { //断线重连
                 $this->connect($this->config);
-                $time = microtime(true);
+                //$time = microtime(true);
                 $result = call_user_func_array([$this->redis, $name], $arguments);
-                Log::debug($name . ':' . (microtime(true) - $time));
+                // Log::debug($name . ':' . (microtime(true) - $time));
             }
 
             if (!empty($this->redis->errCode)) {  //有错误码，则抛出弃常

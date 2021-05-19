@@ -1,19 +1,15 @@
 <?php
 
-
 namespace Family\Server\Adapter;
-
 
 use Family\Core\Config;
 use Family\Core\Log;
 use Family\Core\Route;
-use Family\Coroutine\Context;
 use Family\Coroutine\Coroutine;
 use Family\Exceptions\BaseException;
 use Family\Family;
-use Family\Pool;
-
 use Family\Helper;
+use Swoole;
 
 class WsHandler
 {
@@ -36,7 +32,8 @@ class WsHandler
 
         if ('Darwin' !== PHP_OS) {
             $title = sprintf(
-                "master, ws://%s:%d, running:%s",
+                "%s:master, ws://%s:%d, running:%s",
+                Config::get('app_name', ''),
                 Config::get('host'),
                 Config::get('port'),
                 date("Y-m-d H:i:s")
@@ -56,8 +53,8 @@ class WsHandler
     {
         if ('Darwin' !== PHP_OS) {
             $title = sprintf(
-                "%s, running:%s",
-                'manager',
+                "%s:manager, running:%s",
+                Config::get('app_name', ''),
                 date("Y-m-d H:i:s")
             );
             swoole_set_process_name($title);
@@ -86,6 +83,15 @@ class WsHandler
         }
     }
 
+    public static function onWorkerExit($serv, $worker_id)
+    {
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'workerExit')) {
+                self::$eventHandler->workerExit($serv, $worker_id);
+            }
+        }
+    }
+
     public static function onWorkerError($serv, $worker_id, $worker_pid, $exit_code, $signal)
     {
         if (self::$eventHandler) {
@@ -102,6 +108,7 @@ class WsHandler
             }
         }
         try {
+            \set_error_handler(Config::get('error_handler', BaseException::class . '::errorHandler'));
             if ('Darwin' !== PHP_OS) {
                 $workerNum = Config::getField('swoole_setting', 'worker_num');
                 $isTask = 0;
@@ -143,12 +150,19 @@ class WsHandler
     }
 
     public static function onRequest(
-        \swoole_http_request $request,
-        \swoole_http_response $response
+        Swoole\Http\Request $request,
+        Swoole\Http\Response $response
     ) {
         if (self::$eventHandler) {
             self::$eventHandler->onRequest($request);
         }
+
+        if (empty($request->server['request_method'])) {
+            Log::error('unknow request' . var_export($request, true));
+            $response->end();
+            return;
+        }
+
         if ('OPTIONS' === strtoupper($request->server['request_method'])) {
             $allowMethod = Config::get('allow_http_method', 'GET, HEAD, PUT, DELETE, POST, OPTIONS');
             $response->header('Allow', $allowMethod);
@@ -158,14 +172,9 @@ class WsHandler
         //初始化根协程ID
         Coroutine::setBaseId();
         //初始化上下文
-        $context = new Context($request, $response);
-        //存放容器pool
-        Pool\Context::getInstance()->put($context);
-        //协程退出，自动清空
-        defer(function () {
-            //清空当前pool的上下文，释放资源
-            Pool\Context::getInstance()->release();
-        });
+        $context = Swoole\Coroutine::getContext();
+        $context->request = $request;
+        $context->response = $response;
         try {
             //自动路由
             $result = Route::dispatch();
@@ -193,21 +202,14 @@ class WsHandler
     }
 
     public static function onMessage(
-        \swoole_websocket_server $server,
-        \swoole_websocket_frame $frame
+        Swoole\WebSocket\Server $server,
+        Swoole\WebSocket\Frame $frame
     ) {
+        $frame->request_time_float = microtime(true);
         //初始化根协程ID
         Coroutine::setBaseId();
         //初始化上下文
-        $context = new Context(Helper\Protocol::frameToRequest($frame));
-        $context->set('frame', $frame);
-        //存放容器pool
-        Pool\Context::getInstance()->put($context);
-        //协程退出，自动清空
-        defer(function () {
-            //清空当前pool的上下文，释放资源
-            Pool\Context::getInstance()->release();
-        });
+        Swoole\Coroutine::getContext()->request = Helper\Protocol::frameToRequest($frame);
 
         try {
             //自动路由
@@ -227,8 +229,8 @@ class WsHandler
 
 
     public static function onOpen(
-        \swoole_websocket_server $server,
-        \swoole_http_request $request
+        Swoole\WebSocket\Server $server,
+        Swoole\Http\Request $request
     ) {
         if (self::$eventHandler) {
             if (method_exists(self::$eventHandler, 'open')) {
@@ -238,7 +240,7 @@ class WsHandler
     }
 
     public static function onClose(
-        \swoole_websocket_server $server,
+        Swoole\WebSocket\Server $server,
         int $fd,
         int $reactorId
     ) {
@@ -250,22 +252,14 @@ class WsHandler
     }
 
     public static function onTask(
-        \swoole_websocket_server $server,
-        \swoole_server_task $task
+        Swoole\WebSocket\Server $server,
+        Swoole\Server\Task $task
     ) {
         go(function () use ($server, $task) {
             //初始化根协程ID
             Coroutine::setBaseId();
             //初始化上下文
-            $context = new Context(Helper\Protocol::taskToRequest($task));
-            $context->set('task', $task);
-            //存放容器pool
-            Pool\Context::getInstance()->put($context);
-            //协程退出，自动清空
-            defer(function () {
-                //清空当前pool的上下文，释放资源
-                Pool\Context::getInstance()->release();
-            });
+            Swoole\Coroutine::getContext()->request = Helper\Protocol::taskToRequest($task);
 
             try {
                 //自动路由
@@ -291,11 +285,20 @@ class WsHandler
         });
     }
 
-    public function onFinish($server, $task_id, $data)
+    public static function onFinish($server, $task_id, $data)
     {
         if (self::$eventHandler) {
             if (method_exists(self::$eventHandler, 'finish')) {
                 self::$eventHandler->finish($server, $task_id, $data);
+            }
+        }
+    }
+
+    public static function onPipeMessage($server, $src_worker_id, $data)
+    {
+        if (self::$eventHandler) {
+            if (method_exists(self::$eventHandler, 'pipeMessage')) {
+                self::$eventHandler->pipeMessage($server, $src_worker_id, $data);
             }
         }
     }

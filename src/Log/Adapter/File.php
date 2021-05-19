@@ -26,14 +26,27 @@ class File extends Base
      */
     public function log($level, $message, array $context = null, $original = 0)
     {
-        $logLevel = $this->_config['level'] ?? Level::ALL;
+        if (empty($this->_config['log_level'])) {
+            $logLevel = Level::ALL;
+        } else {
+            $logLevel = $this->_config['log_level'];
+        }
+
         if (isset(Level::$levels[$level]) && Level::$levels[$level] > $logLevel) {
             return true;
         }
 
-        if (!empty($context)) {
-            foreach ($context as $key => $val) {
-                $message = str_replace($key, $val, $message);
+        if (!is_string($message)) {
+            $message = var_export($message, true);
+        } else {
+            if ('Array' == $message) {
+                $message = 'ARRAY:' . var_export(debug_backtrace(), true);
+            } else {
+                if (!empty($context)) {
+                    foreach ($context as $key => $val) {
+                        $message = str_replace($key, $val, $message);
+                    }
+                }
             }
         }
 
@@ -43,20 +56,24 @@ class File extends Base
             $str =  date('Y-m-d H:i:s') . self::SEPARATOR . $message;
         }
         $baseDir = $this->_config['default_basepath'] ?: '/tmp';
-        $logFile = $baseDir . DS . date('Ymd') . '.' . $level . '.log';
-
-        if (!empty($this->fn) && $logFile !== $this->fn) {
-            fclose($this->fp);
-            $this->fp = null;
-            $this->fn = null;
+        if (!empty($this->_config['log_file_func']) && \is_callable($this->_config['log_file_func'])) {
+            $logFile = $this->_config['log_file_func']($level);
+        } else {
+            $logFile = $baseDir . DS . date('Ymd') . '.' . $level . '.log';
         }
 
-        if (empty($this->fp) || !is_resource($this->fp)) {
-            $this->fp = fopen($logFile, 'a');
-            $this->fn = $logFile;
+        if (!empty($this->fn[$level]) && $logFile !== $this->fn[$level]) {
+            fclose($this->fp[$level]);
+            $this->fp[$level] = null;
+            $this->fn[$level] = null;
         }
 
-        fwrite($this->fp, $str . "\n");
+        if (empty($this->fp[$level]) || !is_resource($this->fp[$level])) {
+            $this->fp[$level] = fopen($logFile, 'a');
+            $this->fn[$level] = $logFile;
+        }
+
+        fwrite($this->fp[$level], $str . "\n");
 
         return true;
     }

@@ -1,5 +1,4 @@
 <?php
-//file framework/Family/Pool/Any.php
 namespace Family\Pool;
 
 use chan;

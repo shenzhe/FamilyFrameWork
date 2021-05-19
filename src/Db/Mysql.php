@@ -9,9 +9,12 @@ use Swoole\Coroutine\MySQL as SwMySql;
 class Mysql
 {
     /**
-     * @var MySQL
+     * @var SwMySql
      */
     private $master;   //主数据库连接
+    /**
+     * @var array SwMySql
+     */
     private $slave;     //从数据库连接list
     private $config;    //数据库配置
 
@@ -69,7 +72,7 @@ class Mysql
     /**
      * @param $type
      * @param $index
-     * @return MySQL
+     * @return SwMySql
      * @desc 单个数据库重连
      * @throws \Exception
      */
@@ -117,26 +120,108 @@ class Mysql
         }
     }
 
-    /**
-     * @param $sql
-     * @return mixed
-     * @desc 利用__call,实现操作mysql,并能做断线重连等相关检测
-     * @throws \Exception
-     */
-    public function query($sql)
+    public function query($sql, $param)
+    {
+        $res = $this->chooseDb($sql);
+        /**
+         * @var $db SwMySql
+         */
+        $db = $res['db'];
+        $stmt = $db->prepare($sql);
+        if (false === $stmt) {
+            throw new MysqlException(MysqlException::PREPARE_ERROR, [
+                'code' => $db->errno,
+                'msg' => $db->error
+            ]);
+        }
+
+        $result =  $stmt->execute($param);
+        if (false === $result) {
+            Log::warning('mysql query:{sql} false, params:{params}', ['{sql}' => $sql, '{params}' => $param]);
+            if (!$db->connected) { //断线重连
+                $db = $this->reconnect($res['type'], $res['index']);
+                $time = microtime(true);
+                $result = $db->query($sql, $param);
+                return $this->parseResult($result, $db);
+            }
+
+            if (!empty($db->errno)) {  //有错误码，则抛出弃常
+                throw new MysqlException(
+                    MysqlException::QUERY_ERROR,
+                    [
+                        'msg' => $db->error,
+                        'code' => $db->errno
+                    ]
+                );
+            }
+        }
+
+        return $this->parseResult($result, $stmt);
+    }
+
+    public function exeucte($sql, $param)
     {
         $res = $this->chooseDb($sql);
         $db = $res['db'];
-        $time = microtime(true);
+        $stmt = $db->prepare($sql);
+        if (false === $stmt) {
+            throw new MysqlException(MysqlException::PREPARE_ERROR, [
+                'code' => $db->errno,
+                'msg' => $db->error
+            ]);
+        }
+
+        $result =  $stmt->execute($param);
+        if (false === $result) {
+            if (!$db->connected) { //断线重连
+                $db = $this->reconnect($res['type'], $res['index']);
+                $result = $db->exeucte($sql, $param);
+                return [
+                    'affected_rows' => $stmt->affected_rows,
+                    'insert_id' => $stmt->insert_id,
+                ];
+            }
+
+            if (!empty($db->errno)) {  //有错误码，则抛出弃常
+                throw new MysqlException(
+                    MysqlException::EXEUCTE_ERROR,
+                    [
+                        'msg' => $db->error,
+                        'code' => $db->errno
+                    ]
+                );
+            }
+        }
+
+        return [
+            'affected_rows' => $stmt->affected_rows,
+            'insert_id' => $stmt->insert_id,
+        ];
+    }
+
+    /**
+     * @param $sql
+     * @return mixed
+     * @desc 实现操作mysql,并能做断线重连等相关检测
+     * @throws \Exception
+     */
+    public function querySql($sql)
+    {
+        $res = $this->chooseDb($sql);
+        /**
+         * @var SwMySql
+         */
+        $db = $res['db'];
+        // $time = microtime(true);
         $result = $db->query($sql);
-        Log::debug($sql . ':' . (microtime(true) - $time));
+        // Log::debug($sql . ':' . (microtime(true) - $time));
         if (false === $result) {
             Log::warning('mysql query:{sql} false', ['{sql}' => $sql]);
             if (!$db->connected) { //断线重连
                 $db = $this->reconnect($res['type'], $res['index']);
                 $time = microtime(true);
-                $result = $db->query($sql);
-                Log::debug($sql . ':' . (microtime(true) - $time));
+                $result = $db->querySql($sql);
+                // Log::debug($sql . ':' . (microtime(true) - $time));
                 return $this->parseResult($result, $db);
             }
 
@@ -154,6 +239,18 @@ class Mysql
     }
 
     /**
+     * 
+     */
+    public function escape($val)
+    {
+        if (method_exists($this->master, 'escape')) {
+            return $this->master->escape($val);
+        }
+
+        return addslashes($val);
+    }
+
+    /**
      * @param $name
      * @param $arguments
      * @return mixed
@@ -168,14 +265,14 @@ class Mysql
         //        $result = call_user_func_array([$db, $name], $arguments);
         $time = microtime(true);
         $result = $db->$name($sql);
-        Log::debug($sql . ':' . (microtime(true) - $time));
+        // Log::debug($sql . ':' . (microtime(true) - $time));
         if (false === $result) {
             Log::warning('mysql query:{sql} false', ['{sql}' => $sql]);
             if (!$db->connected) { //断线重连
                 $db = $this->reconnect($res['type'], $res['index']);
                 $time = microtime(true);
                 $result = $db->$name($sql);
-                Log::debug($sql . ':' . (microtime(true) - $time));
+                // Log::debug($sql . ':' . (microtime(true) - $time));
                 return $this->parseResult($result, $db);
             }
 

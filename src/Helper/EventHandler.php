@@ -27,7 +27,7 @@ interface EventHandler
     //请求结束后回调
     public function requestAfter($request, $response, $result);
 
-    //webscoket请求结束后回调
+    //websocket请求结束后回调
     public function messageAfter($serv, $frame, $result);
 
     //task请求结束后回调

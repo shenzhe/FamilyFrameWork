@@ -1,5 +1,5 @@
 <?php
-//file: framework/Family/Helper/Dir.php
+
 namespace Family\Helper;
 
 class Dir
@@ -38,7 +38,7 @@ class Dir
                 }
                 $filename = $file->getFilename();
                 if ($file->isDir()) {
-                    self::tree($dir . DS . $filename, $filter, $deep, $result);
+                    self::tree($dir . DS . $filename, $filter, $result);
 
                 } else {
                     if (!empty($filter) && !\preg_match($filter, $filename)) {

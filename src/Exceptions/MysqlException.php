@@ -1,10 +1,5 @@
 <?php
-
 namespace Family\Exceptions;
-
-
-use Family\Core\Log;
-use Family\Core\Singleton;
 
 /**
  * 异常处理
@@ -21,17 +16,17 @@ class MysqlException extends BaseException
     ];
 
     const UPDATE_NO_WHERE = [
-        'code' => -301,
+        'code' => -305,
         'msg' => 'update必需有where条件',
     ];
 
     const DELETE_NO_WHERE = [
-        'code' => -302,
+        'code' => -306,
         'msg' => 'delete必需有where条件',
     ];
 
     const CONNECT_ERROR = [
-        'code' => -303,
+        'code' => -301,
         'msg' => '连接失败: {msg}: {code}'
     ];
 
@@ -41,20 +36,29 @@ class MysqlException extends BaseException
     ];
 
     const CONFIG_EMPTY = [
-        'code' => -305,
+        'code' => -308,
         'msg' => 'mysql 配置为空'
     ];
 
     const POOL_FULL = [
-        'code' => -306,
+        'code' => -309,
         'msg' => 'mysql连接池已满'
     ];
 
     const POOL_EMPTY = [
-        'code' => -307,
+        'code' => -310,
         'msg' => 'mysql连接池已空'
     ];
 
+    const PREPARE_ERROR = [
+        'code' => -312,
+        'msg' => '{code}: {msg}'
+    ];
+
+    const EXEUCTE_ERROR = [
+        'code' => -313,
+        'msg' => '{code}: {msg}'
+    ];
 
     public function __construct(array $error = null, array $context = [])
     {

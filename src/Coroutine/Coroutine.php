@@ -1,5 +1,4 @@
 <?php
-//file Fmaily/Coroutine/Coroutine.php
 namespace Family\Coroutine;
 
 use Swoole\Coroutine as SwCo;
@@ -80,6 +79,15 @@ class Coroutine
         $nid = self::getId();
         return go(function () use ($cb, $deferCb, $nid) {
             $id = SwCo::getuid();
+            $pContext = SwCo::getContext($nid);
+            if ($pContext) {
+                if (!empty($pContext->request)) {
+                    SwCo::getContext()->request = $pContext->request;
+                }
+                if (!empty($pContext->response)) {
+                    SwCo::getContext()->response = $pContext->response;
+                }
+            }
             defer(function () use ($deferCb, $id) {
                 self::call($deferCb);
                 self::clear($id);

@@ -1,5 +1,4 @@
 <?php
-
 namespace Family\Core;
 
 use Family\Exceptions\ConfigException;
@@ -46,8 +45,17 @@ class Config
      */
     public static function loadLazy()
     {
-        $configPath = Family::$applicationPath . DS . 'config' .
-            DS . self::$configDir;
+        self::loadPath('config' .
+            DS . self::$configDir);
+        self::loadPath('__public__config__');
+    }
+
+    public static function loadPath($dir = 'config')
+    {
+        $configPath = Family::$applicationPath . DS . $dir;
+        if (!is_dir($configPath)) {
+            return;
+        }
         $files = Dir::tree($configPath, "/.php$/");
         if (!empty($files)) {
             foreach ($files as $dir => $filelist) {

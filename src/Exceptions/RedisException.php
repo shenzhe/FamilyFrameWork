@@ -1,10 +1,5 @@
 <?php
-
 namespace Family\Exceptions;
-
-
-use Family\Core\Log;
-use Family\Core\Singleton;
 
 /**
  * 异常处理
@@ -26,17 +21,17 @@ class RedisException extends BaseException
     ];
 
     const NO_SUPPORT_CMD = [
-        'code' => -402,
+        'code' => -404,
         'msg' => '{cmd}命令不支持'
     ];
 
     const CONFIG_EMPTY = [
-        'code' => -403,
+        'code' => -405,
         'msg' => 'redis 配置为空'
     ];
 
     const POOL_FULL = [
-        'code' => -404,
+        'code' => -406,
         'msg' => 'redis连接池已满'
     ];
 
@@ -46,17 +41,17 @@ class RedisException extends BaseException
     ];
 
     const AUTH_ERROR = [
-        'code' => -406,
+        'code' => -407,
         'msg' => '鉴权失败: {msg}: {code}'
     ];
 
     const QUERY_ERROR = [
-        'code' => -407,
+        'code' => -408,
         'msg' => '{query}失败: {msg}: {code}'
     ];
 
     const SELECT_ERROR = [
-        'code' => -407,
+        'code' => -409,
         'msg' => 'select {db}失败, {code}: {msg}'
     ];
 

@@ -1,13 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: shenzhe
- * Date: 2018-12-24
- * Time: 10:58
- */
-
 namespace Family\MVC;
-
 
 use Family\Core\Config;
 

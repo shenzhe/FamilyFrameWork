@@ -1,8 +1,5 @@
 <?php
-
-
 namespace Family\Server;
-
 
 use Family\Core\Config;
 

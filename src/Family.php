@@ -1,11 +1,11 @@
 <?php
-//file: framework/Family/family.php
 namespace Family;
 
 use Family\Core\Config;
 use Family\Core\Log;
 use Family\Server\Server;
-
+use Family\Helper\Formater;
+use Swoole;
 
 class Family
 {
@@ -20,7 +20,7 @@ class Family
     public static $applicationPath;
 
     /**
-     * @var \swoole_server
+     * @var Swoole\Server
      */
     public static $swooleServer;
 
@@ -43,26 +43,29 @@ class Family
             //先注册自动加载
             \spl_autoload_register(__CLASS__ . '::autoLoader');
             //加载配置
-            $configDir = getenv('NAME_SPACE');
             if (empty($configDir)) {
-                $options = getopt("c::");
-                if (!empty($options['c'])) {
-                    $configDir = $options['c'];
+                $configDir = getenv('NAME_SPACE');
+                if (empty($configDir)) {
+                    $options = getopt("c::");
+                    if (!empty($options['c'])) {
+                        $configDir = $options['c'];
+                    }
                 }
             }
             Config::load($configDir);
             $timeZone = Config::get('time_zone', 'Asia/Shanghai');
             \date_default_timezone_set($timeZone);
+            \register_shutdown_function(Config::getField('project', 'fatal_handler', function () {
+                Log::emergency(\var_export(Formater::fatal(error_get_last()), true));
+            }));
             Log::init();
             //服务启动
             (new Server())->start();
         } catch (\Exception $e) {
             Log::exception($e);
-            //            echo $e->getCode() . ':' . $e->getMessage() . PHP_EOL;
             print_r($e);
         } catch (\Throwable $throwable) {
             Log::exception($throwable);
-            //            echo $throwable->getCode() . ':' . $throwable->getMessage() . PHP_EOL;
             print_r($throwable);
         }
     }
