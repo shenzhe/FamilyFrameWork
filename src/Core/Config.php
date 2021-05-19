@@ -1,4 +1,5 @@
 <?php
+
 namespace Family\Core;
 
 use Family\Exceptions\ConfigException;
@@ -15,6 +16,8 @@ class Config
 
     public static $configDir = 'dev';
     public static $defaultConfigFile = 'server.php';
+
+    public static $isLoadLazy = false;
 
 
     /**
@@ -45,9 +48,14 @@ class Config
      */
     public static function loadLazy()
     {
+        if (self::$isLoadLazy) {
+            return;
+        }
         self::loadPath('config' .
             DS . self::$configDir);
         self::loadPath('__public__config__');
+        self::$isLoadLazy = true;
+
     }
 
     public static function loadPath($dir = 'config')

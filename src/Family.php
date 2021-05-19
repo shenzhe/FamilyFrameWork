@@ -56,7 +56,9 @@ class Family
             $timeZone = Config::get('time_zone', 'Asia/Shanghai');
             \date_default_timezone_set($timeZone);
             \register_shutdown_function(Config::getField('project', 'fatal_handler', function () {
-                Log::emergency(\var_export(Formater::fatal(error_get_last()), true));
+                Config::loadLazy();
+                $log = Log::getLogger();
+                $log->emergency(\var_export(Formater::fatal(error_get_last()), true));
             }));
             Log::init();
             //服务启动
